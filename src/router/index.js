@@ -17,9 +17,29 @@ console.log('router const rootURL :', rootURL)
 const isDocProjectIdIncluded = `${import.meta.env.VITE_APP_DOCUMENT_ROUTE_INCLUDE_PROJECT_ID}`.toLowerCase() === 'true'
 console.log('router const isDocProjectIdIncluded :', isDocProjectIdIncluded)
 // const appBasePath = isDocProjectIdIncluded ? '' : ':collId'
+const collectionConfigs = import.meta.glob('confs/*.conf.json', { eager: true })
+
+const getCollectionConfig = (collId) => {
+  if (!collId) return null
+
+  const normalizedId = collId.toLowerCase()
+
+  const match = Object.entries(collectionConfigs).find(([path]) =>
+    path.toLowerCase().includes(`${normalizedId}.conf.json`)
+  )
+
+  return match ? match[1] : null
+}
+
+const viewComponents = {
+  SearchPage: () => import('@/views/SearchPage.vue')
+}
+
+
 
 // NB : scrollBehavior cf https://router.vuejs.org/guide/advanced/scroll-behavior
 
+let timeout;
 let previousRoute = null
 let router = () => {}
 if (isDocProjectIdIncluded) {
@@ -52,22 +72,49 @@ if (isDocProjectIdIncluded) {
         name: 'Document',
         component: () => import('@/views/DocumentPage.vue'),
         props: true
+      },
+      {
+        path: '/:collId?/:customPage',
+        name: 'CustomPage',
+        component: () => import('@/views/CustomPageLoader.vue'),
+        props: true
       }
     ],
     scrollBehavior (to, from, savedPosition) {
 
-      // console.log('scrollBehavior to', to);
-      // console.log('scrollBehavior from', from);
+      console.log('scrollBehavior to', to);
+      console.log('scrollBehavior from', from);
 
       const defaultTop = window.innerWidth < 768 ? 45 : 82;
+      const toHash = to.hash.slice(1);
 
-      if (to.path === from.path && to.hash.length) {
+      if (timeout) clearTimeout(timeout);
+
+      if (to.path === from.path && toHash.length) {
         // Local anchors
-        console.log('scrollBehavior Local anchors', to.path, 'window.innerWidth', window.innerWidth, defaultTop);
-        return {
-          el: to.hash,
-          behavior: 'smooth',
-          top: defaultTop
+        const anchor = document.getElementById(toHash);
+        console.log('scrollBehavior Local anchors', to.path, to.hash, 'window.innerWidth', window.innerWidth, defaultTop, anchor);
+        if (anchor) {
+          // Local anchor of current loaded part of the document
+          return {
+            el: to.hash,
+            behavior: 'smooth',
+            top: defaultTop + 10
+          }
+        } else {
+          // Local anchor of another (non loaded) part of the document
+          return new Promise((resolve, reject) => {
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(() => {
+              // const anchor = document.getElementById(toHash);
+              // console.log('scrollBehavior Local anchors timeout', to.path, to.hash, 'window.innerWidth', window.innerWidth, defaultTop, anchor);
+              resolve({
+                el: to.hash,
+                behavior: 'smooth',
+                top: defaultTop + 10
+              })
+            }, 500)
+          })
         }
       }
 
@@ -89,14 +136,16 @@ if (isDocProjectIdIncluded) {
           // If window scroll is beyond sticky navigation bar, scroll the top of the document under the sticky menu
             console.log('scrollBehavior documentArea1', navTopContainerHeight + defaultTop, defaultTop);
             return new Promise((resolve, reject) => {
-              setTimeout(() => {
+              if (timeout) clearTimeout(timeout);
+              timeout = setTimeout(() => {
                 resolve({ top: totalHeaderHeight, behavior: 'instant' })
               }, 0)
             })
         }
 
         return new Promise((resolve, reject) => {
-          setTimeout(() => {
+          if (timeout) clearTimeout(timeout);
+          timeout = setTimeout(() => {
             resolve({ top: documentScroll, behavior: 'instant' })
           }, 0)
         })
@@ -138,6 +187,12 @@ if (isDocProjectIdIncluded) {
         path: '/document/:id',
         name: 'Document',
         component: () => import('@/views/DocumentPage.vue'),
+        props: true
+      },
+      {
+        path: '/:customPage',
+        name: 'CustomPage',
+        component: () => import('@/views/CustomPageLoader.vue'),
         props: true
       }
     ],
@@ -192,6 +247,27 @@ if (isDocProjectIdIncluded) {
   })
   router.beforeEach((to, from, next) => {
     previousRoute = from
+
+    // Gestion des custom routes
+    if (to.name === 'CustomPage') {
+      const collId = to.params.collId
+
+      // ⚠sécurité si pas de collId en mode multi
+      if (isDocProjectIdIncluded && !collId) {
+        return next({ name: 'Home' })
+      }
+
+      const config = getCollectionConfig(collId)
+
+      const exists = config?.customRoutes?.some(
+        r => r.path === to.params.customPage
+      )
+
+      if (!exists) {
+        return next({ name: 'Home', params: to.params })
+      }
+    }
+
     next()
   })
 } else {
@@ -203,5 +279,6 @@ if (isDocProjectIdIncluded) {
     next()
   })
 }
+
 
 export { router, previousRoute }

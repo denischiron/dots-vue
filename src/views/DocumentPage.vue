@@ -118,6 +118,14 @@
           >
             <div class="tab-header">
               <button
+                v-if="topTOC.length > 1 && topTOCDisplayIndicator"
+                class="dots-button"
+                :class="{ active: activePanel === 'summary' }"
+                @click="activePanel = 'summary'"
+              >
+                Sommaire
+              </button>
+              <button
                 class="dots-button"
                 :class="{ active: activePanel === 'meta' }"
                 @click="activePanel = 'meta'"
@@ -125,13 +133,6 @@
                 Notice
               </button>
 
-              <button
-                class="dots-button"
-                :class="{ active: activePanel === 'summary' }"
-                @click="activePanel = 'summary'"
-              >
-                Sommaire
-              </button>
               <CloseCross
                 href="#"
                 class="dots-button breadcrumb-top-toggle-btn"
@@ -602,6 +603,7 @@ export default {
     console.log('DocumentPage props.collectionConfig', props.collectionConfig)
     const manifestIsAvailable = ref(false)
     const manifest = ref(null)
+    const resourceManifest = ref(null)
     const miradorContainer = ref(null)
     const activeBreadcrumb = ref(null)
     const activeObject = ref(null)       // collection / resource
@@ -777,15 +779,17 @@ export default {
       })
     }
 
+    // Scroll Collection Ariane to active or last Item :
     const breadcrumbScrollToLastItem = function(behavior = 'smooth') {
       console.log('DOM breadcrumbScrollToLastItem', breadcrumbEl.value)
       if (!breadcrumbEl.value) return
       const el = breadcrumbEl.value
 
-      const breadcrumbLastChild = el.querySelector('li:last-child')
-      if (breadcrumbLastChild) {
+      let breadcrumbTargetChild = el.querySelector('li.active')
+      if (!breadcrumbTargetChild) breadcrumbTargetChild = el.querySelector('li:last-child')
+      if (breadcrumbTargetChild) {
         el.scrollTo({
-          left: breadcrumbLastChild.offsetLeft - 40,
+          left: breadcrumbTargetChild.offsetLeft - 40,
           behavior: behavior
         })
       }
@@ -889,7 +893,7 @@ export default {
     }
 
 
-    const miradorInstance = useMirador(miradorContainer, manifest)
+    const miradorInstance = useMirador(miradorContainer)
     // provide an uninitialized instance of Mirador
     provide('mirador', miradorInstance)
 
@@ -1636,7 +1640,7 @@ export default {
       // Case 2 : new objet
       activeBreadcrumb.value = index
       activeObject.value = breadcrumbItem
-      activePanel.value = 'meta'
+      activePanel.value = topTOCDisplayIndicator.value && topTOC.value.length > 1 ? 'summary' : 'meta'
 
       if (event && event.target) {
         // On clock, active element is positionned on left by scrolling Ariane block
@@ -1734,69 +1738,6 @@ export default {
       scrollCurrentTocItemIntoView()
     }
 
-    const setMirador = async () => {
-      try {
-        const response = await fetch(getIiifManifestUrl(), {
-          method: 'GET'
-        })
-
-        if (!response.ok) {
-          manifestIsAvailable.value = false
-          return
-        }
-
-        const loadedManifest = await response.json()
-
-        const currentItem = refId.value
-          ? flatTOC.value.find(item => item.identifier === refId.value)
-          : flatTOC.value.find(item => item.identifier === resourceId.value)
-
-        if (loadedManifest?.type === 'Collection') {
-          console.log('setMirador loadedManifest type:', loadedManifest.type)
-
-          const docManifestURL =
-            currentItem?.extensions?.['dots:resourceIIIFManifest'] ?? null
-
-          console.log('setMirador docManifestURL:', docManifestURL)
-
-          if (!docManifestURL) {
-            manifest.value = null
-            manifestIsAvailable.value = false
-            return
-          }
-
-          const documentResponse = await fetch(docManifestURL, {
-            method: 'GET'
-          })
-
-          if (!documentResponse.ok) {
-            manifest.value = null
-            manifestIsAvailable.value = false
-            return
-          }
-
-          const loadedDocumentManifest = await documentResponse.json()
-
-          console.log(
-            'setMirador loadedDocumentManifest:',
-            loadedDocumentManifest
-          )
-
-          manifest.value = loadedDocumentManifest
-          manifestIsAvailable.value = true
-        } else {
-          manifest.value = loadedManifest
-          manifestIsAvailable.value = true
-        }
-
-        console.log('setMirador manifest:', manifest.value)
-      } catch (error) {
-        console.error('setMirador error:', error)
-        manifest.value = null
-        manifestIsAvailable.value = false
-      }
-    }
-
     const toggleNotes = () => {
       isNotesOpened.value = !isNotesOpened.value
     }
@@ -1806,9 +1747,10 @@ export default {
 
       return (
         leftTOCFragmentIsDocument.value ? leftTOCDisplayIndicator.value &&
-        flatTOC.value.some(item => item.parent === hasChildren) : true
+        flatTOC.value.some(item => item.parent === hasChildren) : leftTOCDisplayIndicator.value && flatTOC.value.filter(item => item.identifier === currentItem.value.identifier)[0]?.children?.length >= 1
       )
     })
+
     const getIiifManifestUrl = () => {
       const resourceIIIFManifest = metadata.value?.extensions?.['dots:resourceIIIFManifest']
       console.log('getIiifManifestUrl metadata.value.extensions["dots:resourceIIIFManifest"] : ', resourceIIIFManifest)
@@ -1835,20 +1777,200 @@ export default {
       return null
     }
 
+    const loadResourceManifest = async () => {
+      const response = await fetch(getIiifManifestUrl(), {
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        throw new Error('Unable to load IIIF manifest')
+      }
+
+      resourceManifest.value = await response.json()
+      console.log('mirador loadResourceManifest resourceManifest:', resourceManifest.value)
+    }
+
+    let _currentLoadId = 0
+    const updateDisplayedManifest = async () => {
+      const loadId = ++_currentLoadId
+
+      try {
+        if (!resourceManifest.value) {
+          manifest.value = null
+          manifestIsAvailable.value = false
+          return
+        }
+
+        // CAS 1 : ressource = Collection
+        if (resourceManifest.value.type === 'Collection') {
+
+          // Sous-cas 1a : un refId est demandé
+          // => charger le manifeste de l'item ciblé
+
+          if (refId.value) {
+            console.log('mirador updateDisplayedManifest refId/currentItem', refId.value, currentItem.value)
+
+            const currentRes = flatTOC.value.find(
+              item => item.identifier === refId.value
+            )
+
+            console.log('mirador updateDisplayedManifest refId/currentItem', refId.value, currentItem)
+
+            const docManifestURL =
+              currentRes?.extensions?.['dots:resourceIIIFManifest']
+
+            if (!docManifestURL) {
+              manifest.value = null
+              manifestIsAvailable.value = false
+              return
+            }
+
+            const response = await fetch(docManifestURL)
+
+            if (loadId !== _currentLoadId) {
+              console.log('updateDisplayedManifest cancelled', loadId)
+              return
+            }
+
+            if (!response.ok) {
+              manifest.value = null
+              manifestIsAvailable.value = false
+              return
+            }
+
+            const manifestJson = await response.json()
+
+            if (loadId !== _currentLoadId) {
+              console.log('updateDisplayedManifest cancelled after json', loadId)
+              return
+            }
+
+            manifest.value = manifestJson
+            manifestIsAvailable.value = true
+
+            console.log('mirador updateDisplayedManifest resourceManifest.value manifest:', resourceManifest.value, manifest.value)
+
+            if (miradorInstance.miradorStore) {
+              miradorInstance.loadManifest(
+                manifest.value,
+                manifest.value?.items?.[0]?.id
+              )
+            }
+
+            return
+          }
+
+          // Sous-cas 1b : affichage de la collection
+          manifestIsAvailable.value = true
+
+          if (miradorInstance.miradorStore) {
+            miradorInstance.loadCollectionManifest(
+              resourceManifest.value
+            )
+          }
+
+          return
+        }
+
+        // CAS 2 : ressource = manifest
+        manifest.value = resourceManifest.value
+        manifestIsAvailable.value = true
+
+        console.log('mirador updateDisplayedManifest manifest:', manifest.value)
+
+        if (miradorInstance.miradorStore) {
+          miradorInstance.loadManifest(manifest.value, manifest.value?.items?.[0]?.id)
+        }
+
+      } catch (error) {
+        if (loadId !== _currentLoadId) {
+          console.log('updateDisplayedManifest cancelled in catch', loadId)
+          return
+        }
+
+        console.error('mirador updateDisplayedManifest error:', error)
+
+        manifest.value = null
+        manifestIsAvailable.value = false
+
+      }
+    }
+
+    watch(
+      () => layout.getViewMode?.(),
+      (newValue, oldValue) => {
+        console.log('mirador layout.getViewMode watch ', oldValue, newValue)
+        const entersImageMode =
+          !oldValue?.includes?.('image') &&
+          newValue?.includes?.('image')
+
+        if (entersImageMode) {
+          console.log('mirador entersImageMode resetView button')
+          nextTick(() => {
+            miradorInstance.resetView()
+          })
+        }
+      }
+    )
+
     watch(
       () => metadata.value?.extensions?.['dots:resourceIIIFManifest'],
-      (newVal) => {
-        console.log('watch metadata.value', metadata.value?.extensions)
-        if (newVal?.length > 0) {
-          //getIiifManifestUrl()
-          console.log('metadata.iiifManifestUrl is now available !!! : ', manifestIsAvailable.value)
-          layout.imageIsAvailable.value = true
-          setMirador()
-        } else {
+      async (newVal) => {
+        console.log('mirador watch resourceIIIFManifest', metadata.value?.extensions)
+
+        if (!newVal) {
           layout.imageIsAvailable.value = false
+          manifest.value = null
+          resourceManifest.value = null
+          manifestIsAvailable.value = false
+          return
+        }
+
+        layout.imageIsAvailable.value = true
+
+        try {
+          await loadResourceManifest()
+          await updateDisplayedManifest()
+        } catch (error) {
+          console.error('mirador resourceIIIFManifest error', error)
+
+          manifest.value = null
+          resourceManifest.value = null
+          manifestIsAvailable.value = false
         }
       }, { immediate: true }
     )
+
+    watch(
+      () => refId.value,
+      async (newRefId, oldRefId) => {
+        console.log('watch mirador updateDisplayedManifest refId', oldRefId, '->', newRefId)
+
+        //if (resourceManifest.value?.type === 'Collection') {
+          await updateDisplayedManifest()
+        //}
+      }
+    )
+
+    watch(
+      () => flatTOC.value.length,
+      async (length) => {
+        if (
+          length > 0 &&
+          resourceManifest.value?.type === 'Collection'
+        ) {
+          await updateDisplayedManifest()
+        }
+      }
+    )
+
+    // Initialiser Mirador dès que le container est disponible dans le DOM
+      watch(miradorContainer, async (newContainer, oldContainer) => {
+      if (newContainer && !oldContainer) {
+        await miradorInstance.initialize()
+        await updateDisplayedManifest()
+      }
+    })
 
     watch(props, async (newProps) => {
 
@@ -2121,6 +2243,7 @@ export default {
       metadata,
       manifestIsAvailable,
       manifest,
+      resourceManifest,
       layout,
       resourceId,
       collection,
@@ -2333,6 +2456,7 @@ export default {
 .controls-toggle .icon-wrapper {
   color: var(--fill-color);
 }
+.controls-toggle:hover .icon-wrapper,
 .controls-toggle[aria-expanded="true"] .icon-wrapper {
   color: #ffffff;
   background-color: var(--fill-color);
@@ -3143,6 +3267,7 @@ ul.breadcrumb-top {
     background: #E5E5E5;
     color: black;
     text-decoration: none;
+    white-space: nowrap;
 
     border: 2px solid var(--meta-banner-fill-color);
     border-radius: var(--crumb-radius);
@@ -3406,6 +3531,17 @@ ul.breadcrumb-top > li:nth-child(10) { z-index: 1; }
   }
 }
 
+a.pb {
+  border: none;
+  background: transparent;
+
+  &:focus,
+  &:hover {
+    color: var(--text-color);
+  }
+
+}
+
 
 @media screen and (max-width: 1320px) {
   .toc-area .toc-area-content nav > ol.tree {
@@ -3419,12 +3555,13 @@ ul.breadcrumb-top > li:nth-child(10) { z-index: 1; }
   }
 
   /* Document page numbers */
-  .pb {
+  a.pb {
     float: none;
     display: block;
     width: 100%;
     position: relative;
     padding: 20px 0;
+    text-decoration: none !important;
   }
 
   .cb, .ed {
@@ -3509,7 +3646,7 @@ ul.breadcrumb-top > li:nth-child(10) { z-index: 1; }
 
   .images-mode .document-views,
   .text-and-images-mode .document-views {
-    margin-right: 45px;
+    margin-right: 0px;
   }
 
   .text-mode .document-views,
@@ -3705,6 +3842,24 @@ ul.breadcrumb-top > li:nth-child(10) { z-index: 1; }
     }
   }
 
+  .mirador-window-top-bar {
+    padding-right: 50px !important;
+  }
+
+  div.MuiPaper-elevation4:has(button[aria-label="collapse"]) {
+    right: unset !important;
+    left: 8px;
+  }
+
+  div.MuiPaper-elevation4:has(button[aria-label="collapse"]) .MuiSvgIcon-root {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  div.MuiPaper-elevation4:has(button[aria-label="collapse"]) .MuiIconButton-root {
+    padding: 6px !important;
+  }
+
 }
 
 @media screen and (max-width: 640px) {
@@ -3793,6 +3948,25 @@ ul.breadcrumb-top > li:nth-child(10) { z-index: 1; }
     order: 1; /* liste avant le bouton */
   }
 
+}
+
+button[aria-label="Window options"] > span {
+  width: 100%;
+  height: 100%;
+  background: url('../assets/images/tools.svg') top center / 30px no-repeat;
+  /* background-color: transparent;*/
+  background-size: contain;
+}
+
+button[aria-label="Window options"] > span > svg {
+  display: none;
+}
+/* force no height for Mirador bottom buttons container to correct an incorrect behaviour */
+.mirador-canvas-nav, .mirador52 {
+  height: unset !important;
+  & > * {
+    background-color: unset !important;
+  }
 }
 
 </style>

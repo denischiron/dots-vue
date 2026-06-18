@@ -64,7 +64,7 @@
                         <a v-if="item.url" :href="item.url" target="_blank">
                           {{ item['schema:name'] ?? item.url }}
                         </a>
-                        <span v-else>{{ item.name ?? JSON.stringify(item) }}</span>
+                        <span v-else>{{ item['schema:name'] ?? JSON.stringify(item) }}</span>
                       </template>
                       <!-- scalar item -->
                       <template v-else>
@@ -135,7 +135,7 @@
                       >
                         {{ value['schema:name'] || value['@id'] || value.url }}
                       </a>
-                      <span v-else>{{ value.name || JSON.stringify(value) }}</span>
+                      <span v-else>{{ value['schema:name'] || JSON.stringify(value) }}</span>
                     </span>
                   </td>
                   <td>
@@ -246,7 +246,7 @@ export default {
       )
 
       const confLogos = import.meta.glob(
-        'confs/*/assets/images/logo_*.svg',
+        'confs/*/assets/images/logo_*.{svg,png}',
         {
           import: 'default',
           eager: true
@@ -259,7 +259,7 @@ export default {
       }
 
       const logo = Object.entries(logos).find(([path]) =>
-        path.endsWith(`/logo_${source}.svg`)
+        path.endsWith(`/logo_${source}.svg`) || path.endsWith(`/logo_${source}.png`)
       )
       console.log('ImgUrl source logo', source, Object.entries(logos))
       if (logo) {
@@ -583,6 +583,7 @@ figure.image img{
   }
 
   .menu {
+    font-size: var(--font-default-size);
     line-height: 1;
   }
 
