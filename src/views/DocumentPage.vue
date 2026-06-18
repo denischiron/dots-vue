@@ -3621,6 +3621,20 @@ a.pb {
     z-index: 11; /* under semi-transparent bg when aside TOC is opened */
   }
 
+  .text-mode .dots-button.text-btn {
+    .icon-wrapper {
+      color: #FFF;
+      background-color: var(--fill-color);
+    }
+  }
+
+  .images-mode .dots-button.images-btn {
+    .icon-wrapper {
+      color: #FFF;
+      background-color: var(--fill-color);
+    }
+  }
+
 }
 
 @media screen and (max-width: 768px) {

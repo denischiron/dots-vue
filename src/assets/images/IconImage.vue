@@ -67,7 +67,6 @@ const cssVars = {
     color: inherit;
     background-color: inherit;
   }
-  .images-mode .icon-wrapper,
   .icon-wrapper:active {
     color: #FFF;
     background-color: var(--fill-color);
