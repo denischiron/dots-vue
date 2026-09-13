@@ -1,0 +1,35 @@
+.md-header {
+  height: 3.3rem;
+}
+
+.md-header__inner {
+  min-height: 3.2rem;
+}
+
+.md-header__button.md-logo {
+  margin: 0;
+  padding: 0.2rem;
+  height: 3.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  /* hauteur fixe, largeur libre : préserve le rapport d'aspect du logo.
+     2.4rem = 48 px (Material pose html{font-size:125%}, donc 1rem = 20px),
+     soit la taille du logo sur dots_documentation : 84 x 48 px. */
+  height: 2.4rem;
+  width: auto;
+}
+
+.md-copyright__highlight {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.footer-logo {
+  height: 7rem !important;
+  width: auto;
+}

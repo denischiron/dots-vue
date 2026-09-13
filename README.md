@@ -19,7 +19,25 @@ Frontend application to browse a DoTS endpoint ([DoTS](https://github.com/dots-s
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE.md)
 
+## Documentation
 
+The documentation site (MkDocs Material) lives in [`mkdocs/`](./mkdocs/) and is published to GitHub
+Pages by [`.github/workflows/docs.yml`](./.github/workflows/docs.yml) on every push to `dev`. Pushes
+to `master` build the site as a check, without publishing it.
+
+📖 **https://dots-suite.github.io/dots-vue/**
+
+It covers installing, configuring, building and deploying the application, and situates it within the
+DoTS suite. To write the settings a deployment runs on, see
+[dots-vue-demo-settings](https://dots-suite.github.io/dots-vue-demo-settings/).
+
+Everyday commands:
+
+```bash
+make docs.install    # install the toolchain (once)
+make docs.serve      # live-reload server on http://127.0.0.1:8000
+make docs.build      # build in strict mode — exactly what the CI runs
+```
 
 ## Project setup
 ### Clone the GitHub repository:  

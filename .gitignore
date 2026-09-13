@@ -36,3 +36,8 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# Documentation
+mkdocs/site/
+venv*/
+.venv/

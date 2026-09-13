@@ -1,0 +1,83 @@
+site_name: DoTS-vue
+site_description: A light front-end for publishing TEI editions served by a DoTS endpoint — themeable, with its own viewer and configurable document rendering.
+site_url: https://dots-suite.github.io/dots-vue/
+repo_url: https://github.com/dots-suite/dots-vue
+repo_name: dots-suite/dots-vue
+edit_uri: edit/dev/mkdocs/docs/
+
+docs_dir: docs
+site_dir: site
+
+use_directory_urls: true
+
+theme:
+  name: material
+  language: en
+  logo: assets/dots-logo-retro.drawio.png
+  favicon: assets/dots-light.png
+  custom_dir: overrides
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.suggest
+  palette:
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: teal
+    accent: teal
+    toggle:
+      icon: material/weather-night
+      name: Switch to dark mode
+
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: teal
+    accent: teal
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - The DoTS suite: suite.md
+  - Installation: installation.md
+  - Configuration: configuration.md
+  - Running and building: running.md
+  - Reading a document: documents.md
+  - Theme and styling: styling.md
+  - Deployment: deployment.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/dots-suite/dots-vue
+
+extra_css:
+  - stylesheets/extra.css
+
+copyright: Copyright &copy; 2026 Jean-Victor Boby — <a href="https://github.com/dots-suite/dots-vue/blob/master/LICENSE.md">MIT License</a>
