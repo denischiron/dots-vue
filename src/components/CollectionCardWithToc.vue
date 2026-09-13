@@ -6,7 +6,6 @@
     <Pagination
       v-model="currentPage"
       :total-pages="totalPages"
-      :is-loading="false"
       :documents-count-text="documentsCountText"
     />
   </div>
@@ -139,7 +138,6 @@
     <Pagination
       v-model="currentPage"
       :total-pages="totalPages"
-      :is-loading="false"
       documents-count-text=""
     />
   </div>

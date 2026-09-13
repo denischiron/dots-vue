@@ -120,7 +120,6 @@
             @facet-close="closeFacet"
             @toggleFacet="onToggleFacet"
             @change-range="onTemporalChange"
-            @apply-collections="executeSearches()"
             @reset-range="resetRange"
             @reset-facet="resetFacet"
             @remove-facet-value="removeActiveFacet"
@@ -138,15 +137,12 @@
             :page-size="pageSize"
             :current-page="page"
             :is-doc-project-id-included="isDocProjectIdInc"
-            :root-collection-identifier="rootCollectionId"
             :is-table-loading="search.loading.value"
             :counts="search.totalCount.value"
             :is-elastic-search="true"
             :total-buckets="search.bucketCount.value"
             :is-with-highlights="!!(isFulltextSearch && inputTerm.trim() && inputTerm.trim().length > 0)"
-            :filters="filters"
             :collection-indexed="search.collectionIndexed.value"
-            @filter-change="updateFilter"
             @sort-change="updateSort"
           /><!--v-if="tableData.length > 0"-->
         </div>
@@ -628,13 +624,6 @@ export default {
     }
 
     // FILTERS
-    const filters = computed(() => search.filters.value)
-
-    const updateFilter = ({ key, value }) => {
-      search.setSearchFilter({ key, value })
-      search.setPageNum(1)
-    }
-
     // SORT
 
     // The API resolves metadata keys to their indexed sort fields:
@@ -908,8 +897,6 @@ export default {
       isInvalidQuery,
       invalidQueryMessage,
       deleteTerm,
-      filters,
-      updateFilter,
       updateSort,
       openedFacets,
       onTemporalChange,

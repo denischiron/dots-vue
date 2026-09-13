@@ -65,7 +65,6 @@
           :columns-config="columns"
           :page-size="pageSize"
           :is-doc-project-id-included="isDocProjectIdInc"
-          :root-collection-identifier="rootCollectionId"
           :is-table-loading="isTableLoading"
           :counts="resultCount"
         />

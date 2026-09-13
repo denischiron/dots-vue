@@ -121,10 +121,8 @@
               </button>
 
               <CloseCross
-                href="#"
                 class="dots-button breadcrumb-top-toggle-btn"
-                fg="blue"
-                size="40"
+                :size="40"
                 @click.prevent="openObject(activeObject, activeBreadcrumb, $event)"
               />
             </div>
@@ -315,7 +313,6 @@
       >
         <IconReadingToolsToggle
           :size="40"
-          :radius="4"
           :is-active="isControlsOpened"
         />
       </button>

@@ -8,7 +8,6 @@
       v-if="displayMode !== 'toc'"
       v-model="currentPage"
       :total-pages="totalPages"
-      :is-loading="false"
       :documents-count-text="documentsCountText"
       @update:modelValue="onPaginationUpdate"
     />
@@ -130,7 +129,6 @@
       v-if="displayMode !== 'toc'"
       v-model="currentPage"
       :total-pages="totalPages"
-      :is-loading="false"
       documents-count-text=""
       @update:modelValue="onBottomPaginationUpdate"
     />
