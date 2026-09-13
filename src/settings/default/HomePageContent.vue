@@ -55,7 +55,6 @@ export default {
     }, { deep: true, immediate: true })
 
     return {
-      appRootUrl,
       dtsCollDescription,
       customCollDescription
     }

@@ -84,7 +84,6 @@
 <script>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import BurgerButton from './Burger.vue'
-import { useRoute } from 'vue-router'
 import defaultLogo from '@/assets/images/logo_dots_circle.svg'
 
 export default {
@@ -134,15 +133,11 @@ export default {
   },
 
   setup (props) {
-    const route = useRoute()
     const isMenuOpened = ref(false)
-    const rootURL = ref(import.meta.env.VITE_APP_APP_ROOT_URL.length > 0 ? `${import.meta.env.VITE_APP_APP_ROOT_URL.slice(1, import.meta.env.VITE_APP_APP_ROOT_URL.length)}` : '')
-    const isDocProjectIdInc = ref(props.isDocProjectIdIncluded)
     const dtsRootCollectionId = ref(props.dtsRootCollectionIdentifier)
     const rootCollectionId = ref(props.rootCollectionIdentifier)
     const appConfig = ref(props.applicationConfig)
     const rootCollConfig = ref(props.rootCollectionConfig)
-    const projectCollConfig = ref(props.projectCollectionConfig)
     const collConfig = ref(props.collectionConfig)
     const imgHref = ref('')
     const imgUrl = ref(undefined)
@@ -372,25 +367,13 @@ export default {
 
     // Expose properties and methods to the template
     return {
-      route,
       isMenuOpened,
       menuCssClass,
-      rootURL,
-      isDocProjectIdInc,
-      dtsRootCollectionId,
       rootCollectionId,
-      appConfig,
-      rootCollConfig,
-      projectCollConfig,
-      collConfig,
       rootShortTitle,
       breadCrumb,
-      collectionId,
       burgerChanged,
-      closeMenu,
       imgUrl,
-      setImgUrl,
-      setApiImgUrl,
       imgHref,
       apiImgUrl,
       apiImgHref

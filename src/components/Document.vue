@@ -5,10 +5,7 @@
       :class="currentLevelIndicator === 'renderToc' ? 'remove-bottom-padding' : ''"
     >
       <Suspense @resolve="scrollTo()">
-        <component
-          :is="customDocument"
-          @has-notes="onHasNotes"
-        />
+        <component :is="customDocument" />
       </Suspense>
     </div>
     <!-- Display a TOC of the current item children in 2 scenarios : -->
@@ -19,8 +16,7 @@
       class="row bottom-toc"
     >
       <TOC
-        :is-doc-projectId-included="isDocProjectIdInc"
-        :margin="0"
+        :is-doc-project-id-included="isDocProjectIdInc"
         :toc="asideTOC"
         :maxcitedepth="maxcitedepth"
         :refid="parentId.includes('&ref=') ? parentId.split('&ref=')[1] : parentId"
@@ -33,8 +29,7 @@
       class="row bottom-toc"
     >
       <TOC
-        :is-doc-projectId-included="isDocProjectIdInc"
-        :margin="0"
+        :is-doc-project-id-included="isDocProjectIdInc"
         :toc="asideTOC"
         :maxcitedepth="maxcitedepth"
         :refid="parentId.includes('&ref=') ? parentId.split('&ref=')[1] : parentId"
@@ -49,8 +44,7 @@
       class="row bottom-toc"
     >
       <TOC
-        :is-doc-projectId-included="isDocProjectIdInc"
-        :margin="0"
+        :is-doc-project-id-included="isDocProjectIdInc"
         :toc="asideTOC"
         :maxcitedepth="maxcitedepth"
         :refid="parentId.includes('&ref=') ? parentId.split('&ref=')[1] : parentId"
@@ -67,7 +61,6 @@ import { useRoute } from 'vue-router'
 import TOC from '@/components/TOC.vue'
 import { useStore } from 'vuex'
 import { router } from '@/router'
-import { previousRoute } from '@/router'
 
 export default {
   name: 'DocumentSource',
@@ -75,7 +68,7 @@ export default {
     TOC
   },
 
-  props: ['id', 'level', 'editoriallevel', 'bottomtoc', 'maxcitedepth', 'documenttype', 'editorialLevelIndicator', 'isDocProjectIdIncluded', 'mediaTypeEndpoint', 'collectionCss', 'projectIdentifier', 'iiifManifest'],
+  props: ['id', 'level', 'editoriallevel', 'bottomtoc', 'maxcitedepth', 'documenttype', 'editorialLevelIndicator', 'isDocProjectIdIncluded', 'mediaTypeEndpoint', 'projectIdentifier', 'iiifManifest'],
   emits: ['has-notes'],
 
   async setup (props, { emit }) {
@@ -84,12 +77,9 @@ export default {
     const route = useRoute()
     const isDocProjectIdInc = ref(props.isDocProjectIdIncluded)
     const mediaType = ref(props.mediaTypeEndpoint)
-    const docProjectId = ref(props.projectIdentifier)
     const manifest = ref(props.iiifManifest)
     console.log('Document.vue manifest', manifest.value)
-    const collCss = ref(props.collectionCss)
     console.log('Document.vue mediaType', mediaType.value)
-    console.log('Document.vue collCss', collCss.value)
     // The parentId will the id used for the DoTS API, it is either the resourceId or the resourceId + '&ref=' + refId
     // TODO: rename to a more appropriate name : it is the id used for Dots API : dotsID ?
     const parentId = ref(props.id)
@@ -290,7 +280,7 @@ export default {
         }
 
         const titleElements = Array.from(xmlDoc.getElementsByTagName('title'))
-        titleElements.forEach((hd, index) => {
+        titleElements.forEach((hd) => {
           const titleTEI = xmlDoc.createElement('tei:title')
           titleTEI.setAttribute('xmlns:tei', 'http://www.tei-c.org/ns/1.0')
           while (hd.firstChild) {
@@ -347,7 +337,6 @@ export default {
 
       // Emit presence of notes to parent
       emit('has-notes', notesPresent)
-      hasNotes.value = notesPresent
 
       console.log('custom document datatei', datatei)
       // Return what will make the async component
@@ -427,15 +416,11 @@ export default {
       updateSideNotes()
       highlightSearchPatterns(highlightPatterns.value)
     }
-    const hasNotes = ref(false)
     let asideNotesParent = null
     let asideNotes = null
     let docRoot = null
     let docContentElement = null
 
-    function onHasNotes(value) {
-      emit('has-notes', value) // remonte vers DocumentPage
-    }
 
     const initAsideNotes = () => {
       docRoot = document.documentElement
@@ -666,19 +651,13 @@ export default {
 
 
     watch(props, (newProps) => {
-      docProjectId.value = newProps.projectIdentifier
       manifest.value = newProps.iiifManifest
       mediaType.value = newProps.mediaTypeEndpoint
-      console.log('Document.vue watch newProps.projectIdentifier / docProjectId.value : ', docProjectId.value)
       console.log('Document.vue watch newProps.mediaTypeEndpoint / mediaType.value : ', mediaType.value)
     }, { immediate: true })
 
     return {
       isDocProjectIdInc,
-      docProjectId,
-      manifest,
-      mediaType,
-      collCss,
       parentId,
       currentLevelIndicator,
       currentLevel,
@@ -687,7 +666,6 @@ export default {
       asideTOC,
       customDocument,
       scrollTo,
-      onHasNotes
     }
   }
 }

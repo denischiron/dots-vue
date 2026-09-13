@@ -156,10 +156,7 @@ export default {
 
     return {
       appBaseUrl,
-      collConfig,
-      currCollection,
       collectionAltTitle,
-      getTabs,
       tabs,
       currentTab
     }

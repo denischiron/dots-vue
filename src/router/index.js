@@ -1,22 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { getProjectFromApi } from '@/api/document'
-
-// import { getTOCFromApi } from '@/api/document'
-
-/* const allowedIds = async (id, type) => {
-  const response = await getTOCFromApi(id, type)
-  console.log('router.beforeEach response', response)
-  if (response.member && type === 'Collection') {
-    return response.member.map(item => item['@id'])
-  }
-} */
 
 const rootURL = `${import.meta.env.VITE_APP_APP_ROOT_URL}`
 console.log('router const rootURL :', rootURL)
 
 const isDocProjectIdIncluded = `${import.meta.env.VITE_APP_DOCUMENT_ROUTE_INCLUDE_PROJECT_ID}`.toLowerCase() === 'true'
 console.log('router const isDocProjectIdIncluded :', isDocProjectIdIncluded)
-// const appBasePath = isDocProjectIdIncluded ? '' : ':collId'
+
 const collectionConfigs = import.meta.glob('confs/*.conf.json', { eager: true })
 
 const getCollectionConfig = (collId) => {
@@ -30,12 +19,6 @@ const getCollectionConfig = (collId) => {
 
   return match ? match[1] : null
 }
-
-const viewComponents = {
-  SearchPage: () => import('@/views/SearchPage.vue')
-}
-
-
 
 // NB : scrollBehavior cf https://router.vuejs.org/guide/advanced/scroll-behavior
 
@@ -80,7 +63,7 @@ if (isDocProjectIdIncluded) {
         props: true
       }
     ],
-    scrollBehavior (to, from, savedPosition) {
+    scrollBehavior (to, from) {
 
       console.log('scrollBehavior to', to);
       console.log('scrollBehavior from', from);
@@ -103,7 +86,7 @@ if (isDocProjectIdIncluded) {
           }
         } else {
           // Local anchor of another (non loaded) part of the document
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             if (timeout) clearTimeout(timeout);
             timeout = setTimeout(() => {
               // const anchor = document.getElementById(toHash);
@@ -135,7 +118,7 @@ if (isDocProjectIdIncluded) {
         if (documentScroll >= totalHeaderHeight) {
           // If window scroll is beyond sticky navigation bar, scroll the top of the document under the sticky menu
             console.log('scrollBehavior documentArea1', navTopContainerHeight + defaultTop, defaultTop);
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
               if (timeout) clearTimeout(timeout);
               timeout = setTimeout(() => {
                 resolve({ top: totalHeaderHeight, behavior: 'instant' })
@@ -143,7 +126,7 @@ if (isDocProjectIdIncluded) {
             })
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           if (timeout) clearTimeout(timeout);
           timeout = setTimeout(() => {
             resolve({ top: documentScroll, behavior: 'instant' })
@@ -196,53 +179,14 @@ if (isDocProjectIdIncluded) {
         props: true
       }
     ],
-    scrollBehavior (to, from, savedPosition) {
+    scrollBehavior () {
       return { top: 0 }
     }
   })
 }
 
-
-/* router.beforeEach(async (to, from) => {
-  if ((to && to.params.collId === '' && to.name === 'Home') || (to && !to.params.collId && to.name === 'Home')) {
-    console.log('router.beforeEach (to && !to.params.collId) || (to && to.params.collId === \'\')', to)
-    return true
-  } else if (to && to.params.collId === '') {
-    return { name: 'Home' }
-  } else if (to) {
-    console.log('router.beforeEach else if (to) ?', to)
-    console.log('router.beforeEach else if (to) to.params.collId !== \'\' ?', to)
-    const allowedResourceIds = to.params.collId !== '' ? await allowedIds(to.params.collId, 'Collection') : await allowedIds('ELEC', 'Collection')
-    console.log('router.beforeEach ', allowedResourceIds, typeof (allowedResourceIds))
-    if ((to.params.collId && !to.params.id) || (to.params.id && allowedResourceIds.some(substr => to.params.id.startsWith(substr)))) {
-      return true
-    } else {
-      console.log('router.beforeEach else if (to) else', to)
-      return { name: 'Home', params: { collId: to.params.collId } }
-    }
-  } else {
-    const allowedResourceIds = await allowedIds(to.params.collId, 'Collection')
-    console.log('router.beforeEach ', allowedResourceIds, typeof (allowedResourceIds))
-    console.log('router.beforeEach from ?', from)
-    if (from.params.id && allowedResourceIds.includes(from.params.id)) {
-      return true
-    } else {
-      return { name: 'Home', params: { collId: from.params.collId } }
-    }
-  }
-}) */
 if (isDocProjectIdIncluded) {
-  /*router.beforeEach(async (to, from) => {
-    console.log(`Navigating to: ${to.name}, with params.collId: ${to.params.collId}, with params.id: ${to.params.id}, with query: ${to.query.refId}, with hash: ${to.hash}`)
-    if (to.params.collId) {
-      const projectId = await getProjectFromApi(to.params.collId)
-      console.log('router.beforeEach projectId', projectId)
-      if (to.params.collId !== projectId) {
-        return { name: to.name, params: { collId: projectId, id: to.params.id } }
-      }
-    }
-  })*/
-  router.afterEach((to, from, next) => {
+  router.afterEach((to) => {
     console.log(`Navigated to: ${to.name}, with params.collId: ${to.params.collId}, with params.id: ${to.params.id}, with query: ${to.query.refId}, with hash: ${to.hash}`)
   })
   router.beforeEach((to, from, next) => {
@@ -252,7 +196,7 @@ if (isDocProjectIdIncluded) {
     if (to.name === 'CustomPage') {
       const collId = to.params.collId
 
-      // ⚠sécurité si pas de collId en mode multi
+      // sécurité si pas de collId en mode multi
       if (isDocProjectIdIncluded && !collId) {
         return next({ name: 'Home' })
       }
@@ -271,7 +215,7 @@ if (isDocProjectIdIncluded) {
     next()
   })
 } else {
-  router.afterEach((to, from, next) => {
+  router.afterEach((to) => {
     console.log(`Navigated to: ${to.name}, NO params.collId, with params.id: ${to.params.id}, with query: ${to.query.refId}, with hash: ${to.hash}`)
   })
   router.beforeEach((to, from, next) => {

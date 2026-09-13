@@ -35,7 +35,7 @@
       <div v-else>
         <CollectionTOC
           v-if="displayOpt !== 'list' && displayOpt !== 'mixed'"
-          :is-doc-projectId-included="isDocProjectIdInc"
+          :is-doc-project-id-included="isDocProjectIdInc"
           :display-option="displayOpt"
           :current-collection="currCollection"
           :dts-root-collection-identifier="dtsRootCollectionId"
@@ -44,11 +44,10 @@
           :collection-config="collConfig"
           :toc="componentTOC"
           :level="1"
-          :margin="0"
         />
         <CollectionCardWithToc
           v-if="displayOpt === 'mixed'"
-          :is-doc-projectId-included="isDocProjectIdInc"
+          :is-doc-project-id-included="isDocProjectIdInc"
           :display-option="displayOpt"
           :current-collection="currCollection"
           :dts-root-collection-identifier="dtsRootCollectionId"
@@ -57,7 +56,6 @@
           :collection-config="collConfig"
           :toc="componentTOC"
           :level="1"
-          :margin="0"
         />
 
         <!-- RESOURCE LIST AS LIST OR TOC (conf: homePageSettings.listSection.displayMode = 'list' or 'toc' or unset) -->
@@ -78,14 +76,13 @@
 </template>
 
 <script>
-import { computed, defineAsyncComponent, inject, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 
 import { getMetadataFromApi } from '@/api/document.js'
 import ResourcesList from '@/components/ResourcesList.vue'
 import CollectionTOC from '@/components/CollectionTOC.vue'
 import { getSimpleObject } from '@/composables/utils.js'
 import CollectionCardWithToc from '@/components/CollectionCardWithToc.vue'
-import DirectionalChevron from '@/assets/images/DirectionalChevron.vue'
 import CollectionHeader from '@/components/CollectionHeader.vue'
 
 const collator = new Intl.Collator('fr', {
@@ -138,32 +135,22 @@ export default {
     const state = reactive({
       isTreeOpened: false
     })
-    const layout = inject('variable-layout')
 
     const appRootUrl = ref(`${import.meta.env.VITE_APP_APP_ROOT_URL}`)
     console.log('HomePage setup appRootUrl', appRootUrl.value)
-    const normalisedBaseUrl = (baseURL) => {
-      return baseURL.replace(/\/+$/, '') + '/'
-    }
     const isDocProjectIdInc = computed(() => props.isDocProjectIdIncluded)
     const dtsRootCollectionId = computed(() => props.dtsRootCollectionIdentifier)
     const rootCollectionId = computed(() => props.rootCollectionIdentifier)
     const appConfig = computed(() => props.applicationConfig)
     const collConfig = computed(() => props.collectionConfig)
-    const collectionDescription = computed(() => props.collectionConfig?.homePageSettings?.descriptionSection?.collectionDescription || '')
 
     const customCollectionDescription = computed(() =>
       props.collectionConfig?.homePageSettings?.descriptionSection?.customCollectionDescription)
     console.log('HomePage setup customCollectionDescription', customCollectionDescription.value)
-    const customDescription = shallowRef('')
     const collectionAltTitle = computed(() => props.collectionConfig.homePageSettings?.pageHeader?.collectionAltTitle)
     console.log('HomePage setup collectionAltTitle', collectionAltTitle.value)
-    const aboutBttnTxt = computed(() => props.collectionConfig.homePageSettings.pageHeader.aboutButtonText)
     const isAboutOpened = ref(false)
 
-    const hasNonEmptyObject = arr => arr.some(obj => obj && Object.keys(obj).length > 0)
-    const hasAbout = computed(() => hasNonEmptyObject(props.collectionConfig.aboutPageSettings))
-    const browseBttnTxt = computed(() => props.collectionConfig.homePageSettings.listSection.browseButtonText)
     const collectionId = computed(() => props.collectionIdentifier)
     console.log('HomePage setup collectionId', collectionId.value)
 
@@ -228,242 +215,8 @@ export default {
     }
 
 
-    const homeCssClass = computed(() => {
-      return state.isTreeOpened ? 'is-tree-opened' : ''
-    })
 
 
-    // IMAGES
-
-    /* COLLECTION BANNER */
-    const banner = computed(() => getBanner())
-    const bannerUrl = computed(() => banner.value.url)
-    const hasBanner = computed(() => !!banner.value.url)
-    const bannerType = computed(() => banner.value.type)
-
-    const collectionBanner = computed(() => {
-      if (!bannerUrl.value) return {}
-
-      return {
-        backgroundImage: `url(${bannerUrl.value})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }
-    })
-
-    const getBanner = () => {
-      // Load image candidates
-      const images = Object.fromEntries(
-        Object.entries(
-          import.meta.glob([
-            'confs/*/assets/images/*.*',
-            '/src/assets/images/*.*'
-          ], { eager: true })
-        ).map(([key, value]) => {
-          const newKey = key.split('/').slice(-4).join('/')
-          return [newKey, value]
-        })
-      )
-      // Current collection banner name ?
-      const collectionBanner = collConfig.value.homePageSettings?.pageHeader?.collectionBannerImg
-      // Default banner name ?
-      const defaultBannerName = appConfig.value?.genericConf?.homePageSettings?.pageHeader?.collectionBannerImg
-
-      // If collection banner name is default name
-      if (collectionBanner === defaultBannerName) {
-
-        // Default images (Dots-vue app or custom folder)
-        const defaultCustMatch = images[`default/assets/images/${defaultBannerName}`]
-        const defaultAppMatch = images[`src/assets/images/${defaultBannerName}`]
-
-        // Generic banner (custom settings default folder)
-        if (defaultCustMatch) {
-          return {
-            url: defaultCustMatch.default,
-            type: 'default'
-          }
-        }
-
-        // Fallback src/assets
-        if (defaultAppMatch) {
-          return {
-            url: defaultAppMatch.default,
-            type: 'default'
-          }
-        }
-      }
-      // Not a default banner : find a matching banner
-      else if (collectionBanner && collectionBanner.length > 0) {
-        // External URL
-        if (collectionBanner.startsWith('http')) {
-          return {
-            url: collectionBanner,
-            type: 'collection'
-          }
-        }
-        // Local collection image
-        const match = images[`${collConfig.value.collectionId}/assets/images/${collectionBanner}`]
-        console.log('HomePage getBanner match: ', match)
-        if (match) {
-          return {
-            url: match.default,
-            type: 'collection'
-          }
-        }
-      }
-      // No banner found
-      return {
-        url: null,
-        type: 'none'
-      }
-    }
-
-    /* COLLECTION IMAGE */
-    const image = computed(() => getImg())
-    const imgUrl = computed(() => image.value.url)
-    const hasImage = computed(() => !!image.value.url)
-    const imageType = computed(() => image.value.type)
-    const imageComponent = computed(() => image.value.component)
-
-    const isVueComponent = (val) => typeof val === 'object' && (val.render || val.setup)
-
-    const resolveModule = (mod, type) => {
-      if (!mod) return null
-
-      const value = mod.default
-
-      // Vue component
-      if (isVueComponent(value)) {
-        return {
-          component: value,
-          type: 'component'
-        }
-      }
-
-      // Regular image
-      return {
-        url: value,
-        type
-      }
-    }
-
-    const getImg = () => {
-      // TODO: provide a logo object with url AND legend ?
-      // Load image candidates
-      const images = Object.fromEntries(
-        Object.entries(
-          import.meta.glob([
-            'confs/*/assets/images/*.*',
-            '/src/assets/images/*.*'
-          ], { eager: true })
-        ).map(([key, value]) => {
-          const newKey = key.split('/').slice(-4).join('/')
-          return [newKey, value]
-        })
-      )
-      // Current collection image name ?
-      const collectionImg = collConfig.value.homePageSettings?.listSection?.logo
-      // Default image name ?
-      const defaultImgName = appConfig.value?.genericConf?.homePageSettings?.listSection?.logo
-
-      // If collection image name is default name
-      if (collectionImg === defaultImgName) {
-
-        // Default images (Dots-vue app or custom folder)
-        const defaultCustMatch = images[`default/assets/images/${defaultImgName}`]
-        const defaultAppMatch = images[`src/assets/images/${defaultImgName}`]
-
-        // Generic image (custom settings default folder)
-        const resolved =
-          resolveModule(defaultCustMatch, 'default') ||
-          resolveModule(defaultAppMatch, 'default')
-
-        if (resolved) return resolved
-      }
-      // Not a default image : find a matching image
-      else if (collectionImg && collectionImg.length > 0) {
-        console.log('HomePage getImg found : ', collectionImg)
-        console.log('HomePage getImg images: ', images)
-        // External URL
-        if (collectionImg.startsWith('http')) {
-          return {
-            url: collectionImg,
-            type: 'collection'
-          }
-        }
-        // Local collection image
-        const match = images[`${collConfig.value.collectionId}/assets/images/${collectionImg}`]
-        console.log('HomePage getImg match: ', match)
-
-        const resolved = resolveModule(match, 'collection')
-        if (resolved) return resolved
-      }
-      // No image found
-      return {
-        url: null,
-        type: 'none'
-      }
-    }
-
-    // const getCustomHomeDescription = async () => {
-    //   let component
-    //   console.log('HomePage getCustomHomeDescription collConfig.value.collectionId', collConfig.value.collectionId)
-    //   console.log('HomePage getCustomHomeDescription collConfig.value.aboutPageSettings', collConfig.value.homePageSettings)
-    //   const comps = Object.fromEntries(Object.entries(import.meta.glob('confs/**/*.vue')).map(([key, value]) => {
-    //     // remove first / if exists
-    //     const newKey = key.replace(import.meta.env.VITE_APP_CUSTOM_SETTINGS_PATH, '').replace(/^\//, '')
-    //     return [newKey, value]
-    //   }))
-    //
-    //   const defaultSettings = import.meta.glob('../settings/default/HomePageContent.vue', { eager: true })
-    //   comps['../settings/default/HomePageContent.vue'] = defaultSettings['../settings/default/HomePageContent.vue']
-    //
-    //   const match = comps[`${collConfig.value.collectionId}/${customCollectionDescription.value.compName}.vue`]
-    //   const matchRootCollection = comps[`${rootCollectionId.value}/${customCollectionDescription.value.compName}.vue`]
-    //   console.log('match 1 : ', match)
-    //   console.log('matchRootCollection : ', matchRootCollection)
-    //   const defaultCollection = comps['../settings/default/HomePageContent.vue']
-    //
-    //   if (match) {
-    //     console.log('match 2 : ', match)
-    //     component = defineAsyncComponent(() => import(`confs/${collConfig.value.collectionId}/${customCollectionDescription.value.compName}.vue`)
-    //       .then((comp) => {
-    //         return comp
-    //       })
-    //       .catch((error) => {
-    //         console.log(`error loading 1 confs/${collConfig.value.collectionId}/${customCollectionDescription.value.compName}.vue : `, error)
-    //       })
-    //     )
-    //   } else if (matchRootCollection) {
-    //     component = defineAsyncComponent(() => import(`confs/${rootCollectionId.value}/${customCollectionDescription.value.compName}.vue`)
-    //       .then((comp) => {
-    //         return comp
-    //       })
-    //       .catch((error) => {
-    //         console.log(`error loading 2 confs/${rootCollectionId.value}/${customCollectionDescription.value.compName}.vue : `, error)
-    //       })
-    //     )
-    //   // matching About pages as default
-    //   // TODO : replace tabName by the default tabNames if incorrectly set
-    //   } else if (defaultCollection) {
-    //     component = defineAsyncComponent(() => import('../settings/default/HomePageContent.vue')
-    //       .then((comp) => {
-    //         return comp
-    //       })
-    //       .catch((error) => {
-    //         console.log('error loading \'../settings/default/HomePageContent.vue\' : ', error)
-    //       })
-    //     )
-    //   } else {
-    //     console.log('nothing')
-    //     component = null
-    //   }
-    //   return component
-    // }
-
-    const toggleAbout = () => {
-      isAboutOpened.value = !isAboutOpened.value
-    }
 
     watch(
       () => collConfig.value?.homePageSettings?.listSection?.openState,
@@ -627,42 +380,16 @@ export default {
     return {
       isDev,
       reload,
-      appRootUrl,
-      normalisedBaseUrl,
       appConfig,
       collConfig,
-      customSort,
       isDocProjectIdInc,
       dtsRootCollectionId,
       rootCollectionId,
-      collectionAltTitle,
-      aboutBttnTxt,
-      collectionDescription,
-      homeCssClass,
-      tocCssClass: layout.tocCssClass,
-      hasBanner,
-      bannerType,
-      getBanner,
-      collectionBanner,
-      hasImage,
-      image,
-      imageType,
-      imageComponent,
-      imgUrl,
-      getImg,
       collectionId,
       currCollection,
       componentTOC,
-      toggleExpanded,
-      expandedById,
       displayOpt,
-      browseBttnTxt,
-      customCollectionDescription,
-      //getCustomHomeDescription,
-      customDescription,
-      toggleAbout,
       isAboutOpened,
-      hasAbout,
       columns,
       pageSize,
       dataSource,

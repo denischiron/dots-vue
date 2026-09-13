@@ -146,7 +146,6 @@ export default {
     })
 
     return {
-      collectionId,
       currCollection,
       footTitle,
       footSubtitles,

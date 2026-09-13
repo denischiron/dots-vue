@@ -80,7 +80,7 @@
         <!-- ===================== -->
         <template v-if="facet.type === 'temporal'">
           <TemporalFacetSlider
-            :temporal-facets="[facet.temporal]"
+            :temporal-facet="facet.temporal"
             :ranges="ranges"
             @change="$emit('change-range',$event)"
           />

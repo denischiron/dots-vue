@@ -1,7 +1,7 @@
 <template>
   <!-- PAGINATION TOP -->
   <Pagination
-    v-model="currentPage"
+    v-model="pageNumber"
     :total-pages="totalPages"
     :is-table-loading="isTableLoading"
     :documents-count-text="resultsSummaryText"
@@ -283,7 +283,7 @@
   <!-- PAGINATION BOTTOM -->
   <Pagination
     v-if="totalPages > 1"
-    v-model="currentPage"
+    v-model="pageNumber"
     :total-pages="totalPages"
     :is-table-loading="isTableLoading"
     documents-count-text=""
@@ -304,8 +304,7 @@ import useSimpleSearch from '@/composables/use-simple-search'
 
 
 export default {
-name: 'CollectionTOC',
-  methods: { router },
+name: 'ResourcesList',
   components: {
     SortIcon,
     Pagination
@@ -317,7 +316,6 @@ name: 'CollectionTOC',
     currentPage: { type: Number, default: 1 },
     pageSize: { type: Number, default: 10 },
     isDocProjectIdIncluded: Boolean,
-    rootCollectionIdentifier: String,
     counts: { type: Number },
     isElasticSearch: Boolean,
     totalBuckets: { type: Number },
@@ -331,9 +329,8 @@ name: 'CollectionTOC',
   ],
 
   setup(props, { emit }) {
-    const isDocProjectIdInc = computed(() => props.isDocProjectIdIncluded)
     // STATE
-    const currentPage = ref(props.currentPage)
+    const pageNumber = ref(props.currentPage)
     const dataSource = computed(() => props.data || [])
     const isTableLoading = computed(() => props.isTableLoading)
     const pageSize = ref(props.pageSize)
@@ -382,7 +379,7 @@ name: 'CollectionTOC',
 
     const table = useTable(dataSource, columns, {
       pageSize,
-      currentPage,
+      currentPage: pageNumber,
       remote: isElasticSearch,
       totalResults: remoteTotalResults
     })
@@ -398,8 +395,6 @@ name: 'CollectionTOC',
 
     // DATA
     const totalPages = computed(() => table.totalPages.value)
-    const totalResults = computed(() => table.totalResults.value)
-    const getValue = computed(() => table.getValue)
     const paginated = computed(() => table.paginated.value)
 
     // NO RESULTS HANDLING (not -properly- indexed yet, or no results)
@@ -444,7 +439,7 @@ name: 'CollectionTOC',
 
     const search = useSimpleSearch()
 
-    watch(currentPage, async (page) => {
+    watch(pageNumber, async (page) => {
       if (isElasticSearch.value) {
         store.commit('search/setSearchPage', page < 1 ? 1 : page)
 
@@ -455,7 +450,7 @@ name: 'CollectionTOC',
     watch(
       () => props.currentPage,
       page => {
-        currentPage.value = page
+        pageNumber.value = page
       }
     )
 
@@ -576,32 +571,6 @@ name: 'CollectionTOC',
       store.commit('setCollectionId', collId)
     }
 
-    const buildSearchDocumentRoute = (resId, passId) => {
-      if (isDocProjectIdInc.value) {
-        return {
-          name: 'Document',
-          params: {
-            collId: store.state.collectionId,
-            id: resId
-          },
-          query: {
-            refId: passId
-          }
-        }
-      }
-      return {
-        name: 'Document',
-        params: { id: resId }
-      }
-    }
-
-    const getSearchTableHref = (resId, passId) => {
-      const to = buildSearchDocumentRoute(resId, passId)
-      console.log('getSearchTableHref', to)
-      console.log('getSearchTableHref resId, passId', resId, passId)
-      return router.resolve(to).href
-    }
-
     const buildDocumentRoute = (item) => {
       if (props.isDocProjectIdIncluded) {
         return {
@@ -637,14 +606,11 @@ name: 'CollectionTOC',
     }
 
     return {
-      currentPage,
-      dataSource,
-      resultsCounts,
+      pageNumber,
       bucketsCount,
       showNotIndexed,
       showNoResults,
       isHighlights,
-      openRows,
       toggle,
       isOpen,
       columns,
@@ -652,17 +618,12 @@ name: 'CollectionTOC',
       filters,
       sort,
       totalPages,
-      totalResults,
-      getValue,
       getRowValue,
       paginated,
       resultsSummaryText,
       toggleSort,
-      setStateCollection,
-      buildDocumentRoute,
       buildBreadcrumbParts,
       getTableHref,
-      getSearchTableHref,
       goToPageTable,
       tableVariant,
       gridTemplateColumns

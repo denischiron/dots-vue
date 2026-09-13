@@ -142,7 +142,6 @@ export default {
 
     return {
       collectionAltTitle,
-      currCollection,
       websiteURL,
       lastModified
     }

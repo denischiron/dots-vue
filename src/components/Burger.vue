@@ -49,7 +49,6 @@ export default {
     return {
       toggleBurger,
       menuCssClass,
-      isMenuOpened
     }
   }
 

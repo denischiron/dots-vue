@@ -16,7 +16,7 @@
     :class="displayMode !== 'toc' ? `${displayMode}-mode` : 'toc-mode'"
   >
     <div
-      v-for="(item, index) in paginated"
+      v-for="item in paginated"
       :key="item.identifier"
       class="document-card collection-card-with-toc-component"
     >
@@ -83,14 +83,13 @@
             class="menu app-width-margin expanded"
           >
             <CollectionTOC
-              :is-doc-projectId-included="isDocProjectIdInc"
+              :is-doc-project-id-included="isDocProjectIdInc"
               :display-option="'toc'"
               :current-collection="item"
               :dts-root-collection-identifier="dtsRootCollectionId"
               :root-collection-identifier="rootCollectionId"
               :application-config="appConfig"
               :collection-config="collConfig"
-              :margin="$props.margin"
               :toc="item.children"
               :level="lvl+1"
             />
@@ -146,7 +145,7 @@
   </div>
 </template>
 <script>
-import { ref, watch, onMounted, nextTick, onUnmounted, computed } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { getAncestors, getMetadataFromApi } from '@/api/document.js'
 import store from '@/store'
@@ -197,11 +196,6 @@ export default {
       required: true,
       default: () => [],
       type: Array
-    },
-    margin: {
-      required: true,
-      default: 0,
-      type: Number
     },
     level: {
       required: false,
@@ -259,10 +253,6 @@ export default {
     )
 
     const currCollection = ref({...props.currentCollection})
-
-    const browseBttnTxt = computed(() =>
-      props.collectionConfig?.homePageSettings?.listSection?.browseButtonText
-    )
 
     const displayOpt = computed(() =>
         props.applicationConfig?.homePageSettings?.listSection?.displayMode?.length > 0
@@ -386,7 +376,6 @@ export default {
 
     const pagination = usePagination(componentTOC, pageSize, currentPage)
 
-    const totalResults = computed(() => componentTOC.value.length)
 
     const totalPages = computed(() =>{
       if (displayOpt.value === 'toc') {
@@ -428,10 +417,6 @@ export default {
     })
 
     // TOC ACTIONS AND NAVIGATION
-    const setStateCollection = (collId) => {
-      store.commit('setCollectionId', collId)
-    }
-
     // CARDS (incl. CARDS OF MIXED DISPLAY MODE) LINK MANAGEMENT
     const canNavigate = (item) => {
       return isDocProjectIdInc.value && (item.parent === rootCollectionId.value || item.identifier === item.projectIdentifier)
@@ -469,121 +454,7 @@ export default {
     }
 
     // TOC MODE NAV
-    const goToPage = async (item, event) => {
-      // Browser events handling
-      if (
-        event?.metaKey ||
-        event?.ctrlKey ||
-        event?.shiftKey ||
-        event?.button === 1
-      ) {
-        return
-      }
-
-      const to = getRoute(item)
-
-      // Collections with routing → toggle
-      if (!to) {
-        await toggleExpanded(item)
-        return
-      }
-      event.preventDefault()
-
-      await router.push(to)
-      setStateCollection(selectedParent.value)
-    }
-
-    const getRoute = (item) => {
-      const isCollection =
-        item['@type'] === 'Collection' || item.citeType === 'Collection'
-
-      if (isCollection) {
-        if (!isDocProjectIdInc.value) return null
-
-        if (
-          item.parent === rootCollectionId.value &&
-          rootCollectionId.value !== dtsRootCollectionId.value
-        ) {
-          return {
-            name: 'Home',
-            params: { collId: item.identifier }
-          }
-        }
-
-        if (
-          item.parent === rootCollectionId.value &&
-          rootCollectionId.value === dtsRootCollectionId.value
-        ) {
-          return {
-            name: 'Home',
-            params: {
-              collId: item.projectIdentifier
-                ? (item.projectIdentifier !== item.parent
-                    ? item.projectIdentifier
-                    : item.identifier)
-                : item.identifier
-            }
-          }
-        }
-
-        return null
-      }
-
-      // documents (@type Resource)
-      if (isDocProjectIdInc.value) {
-        if (selectedParent.value === rootCollectionId.value) {
-          return {
-            name: 'Document',
-            params: {
-              collId: rootCollectionId.value,
-              id: item.identifier
-            }
-          }
-        }
-
-        if (
-          selectedParent.value !== rootCollectionId.value &&
-          item.projectIdentifier &&
-          !Array.isArray(item.parent)
-        ) {
-          return {
-            name: 'Document',
-            params: {
-              collId: item.projectIdentifier,
-              id: item.identifier
-            }
-          }
-        }
-
-        if (selectedParent.value !== rootCollectionId.value) {
-          return {
-            name: 'Document',
-            params: {
-              collId: Array.isArray(item.parent)
-                ? (item.parent.find(p => p === route.params.collId)
-                    ? route.params.collId
-                    : item.parent[0])
-                : item.parent,
-              id: item.identifier
-            }
-          }
-        }
-      }
-
-      return {
-        name: 'Document',
-        params: {
-          id: item.identifier
-        }
-      }
-    }
-
     // TOC MODE GET ROW LINK TO DISPLAY
-    const getHref = (item) => {
-      const to = getRoute(item)
-      return to ? router.resolve(to).href : null
-    }
-
     watch(
   () => store.state.currentItem,
 
@@ -659,7 +530,6 @@ export default {
     )
 
     return {
-      route,
       isDocProjectIdInc,
       displayOpt,
       displayMode,
@@ -668,22 +538,13 @@ export default {
       rootCollectionId,
       appConfig,
       collConfig,
-      customSort,
-      browseBttnTxt,
-      toggleExpanded,
       ImgUrl,
       expandedById,
-      selectedParent,
-      componentTOC,
-      setStateCollection,
-      openInitialCollections,
       canNavigate,
       handleClick,
       currentPage,
-      pageSize,
       totalPages,
       paginated,
-      totalResults,
       documentsCountText
     }
   }

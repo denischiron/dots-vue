@@ -68,7 +68,7 @@ async function getMetadataFromApi (id, collConfig= null, route = null,  options 
       if (collConfig && route) {
         console.log('metadata document.js use process', collConfig, key)
         const { processMetadata } = useMetadataProcessor()
-        normalizedMetadata = processMetadata(getSimpleObject(metadataCache.get(key)), collConfig, key, route)
+        normalizedMetadata = processMetadata(getSimpleObject(metadataCache.get(key)), key)
         console.log('metadata document.js normalizedMetadata from cache', normalizedMetadata)
         return normalizedMetadata
       }
@@ -160,7 +160,7 @@ async function getMetadataFromApi (id, collConfig= null, route = null,  options 
       if (collConfig && route) {
         console.log('metadata document.js use process', collConfig, realId)
         const { processMetadata } = useMetadataProcessor()
-        normalizedMetadata = processMetadata(simpleMetadata, collConfig, realId, route)
+        normalizedMetadata = processMetadata(simpleMetadata, realId)
         console.log('metadata document.js normalizedMetadata from simpleMetadata', simpleMetadata, normalizedMetadata)
         return normalizedMetadata
       }

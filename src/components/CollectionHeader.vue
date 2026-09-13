@@ -166,7 +166,6 @@ export default {
     const collectionId = computed(() => props.collectionIdentifier)
     const rootCollectionId = computed(() => props.rootCollectionIdentifier)
 
-    const displayAbout = computed(() => props.showAbout)
     const isAboutOpened = ref(false)
 
     const appRootUrl = ref(`${import.meta.env.VITE_APP_APP_ROOT_URL}`)
@@ -346,7 +345,6 @@ export default {
     const imgUrl = computed(() => image.value.url)
     const hasImage = computed(() => !!image.value.url)
     const imageType = computed(() => image.value.type)
-    const imageComponent = computed(() => image.value.component)
 
     const isVueComponent = (val) => typeof val === 'object' && (val.render || val.setup)
 
@@ -459,7 +457,6 @@ export default {
       aboutBttnTxt,
       collectionDescription,
       customCollectionDescription,
-      getCustomHomeDescription,
       customDescription,
       hasBanner,
       bannerType,

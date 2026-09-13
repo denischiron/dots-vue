@@ -21,7 +21,7 @@
     :class="displayMode !== 'toc' ? `${displayMode}-mode` : 'toc-mode'"
   >
     <div
-      v-for="(item, index) in paginated"
+      v-for="item in paginated"
       :key="item.identifier"
       class="document-card collection-toc-component"
     >
@@ -175,7 +175,7 @@
       <div v-if="expandedById[currCollection.identifier]">
         <ul class="tree">
           <template
-            v-for="(item, index) in componentTOC"
+            v-for="item in componentTOC"
             :key="item.identifier"
           >
             <li
@@ -301,14 +301,13 @@
                 class="is-tree-opened menu expanded"
               >
                 <CollectionTOC
-                  :is-doc-projectId-included="isDocProjectIdInc"
+                  :is-doc-project-id-included="isDocProjectIdInc"
                   :display-option="displayOpt"
                   :current-collection="item"
                   :dts-root-collection-identifier="dtsRootCollectionId"
                   :root-collection-identifier="rootCollectionId"
                   :application-config="appConfig"
                   :collection-config="collConfig"
-                  :margin="$props.margin + 23"
                   :toc="item.children"
                   :level="lvl+1"
                 />
@@ -373,11 +372,6 @@ export default {
       required: true,
       default: () => [],
       type: Array
-    },
-    margin: {
-      required: true,
-      default: 0,
-      type: Number
     },
     level: {
       required: false,
@@ -709,7 +703,6 @@ export default {
 
     const pagination = usePagination(componentTOC, pageSize, currentPage)
 
-    const totalResults = computed(() => componentTOC.value.length)
 
     const totalPages = computed(() =>{
       if (displayOpt.value === 'toc') {
@@ -1004,24 +997,19 @@ export default {
     return {
       route,
       isDocProjectIdInc,
-      collectionBreadcrumb,
       lvl,
       displayOpt,
       dtsRootCollectionId,
       rootCollectionId,
       appConfig,
       collConfig,
-      customSort,
       browseBttnTxt,
       toggleExpanded,
       collectionImages,
       expandedById,
       selectedParent,
       componentTOC,
-      setStateCollection,
-      openInitialCollections,
       textEls,
-      resizeObserver,
       descExpandedItems,
       expandDescription,
       expandDescriptionClass,
@@ -1030,15 +1018,12 @@ export default {
       displayMode,
       currCollection,
       currentPage,
-      pageSize,
       totalPages,
       paginated,
-      totalResults,
       onPaginationUpdate,
       onBottomPaginationUpdate,
       documentsCountText,
       getHref,
-      getRoute,
       goToPage
     }
   }

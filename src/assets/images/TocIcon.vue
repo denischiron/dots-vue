@@ -64,8 +64,6 @@ const props = defineProps({
   bgColor: { type: String, default: 'var(--icon-bg)' },
   fgColor: { type: String, default: 'var(--icon-fg)' },
   size: { type: Number, default: 40 },
-  iconScale: { type: Number, default: 0.8 },
-  iconScaleOrigin: { type: String, default: 'center' },
   radius: { type: Number, default: 6 }
 })
 
@@ -75,9 +73,6 @@ const cssVars = computed(() => ({
   '--size': `${props.size}px`,
   '--radius': `${props.radius}px`
 }))
-
-const iconTransform = computed(() => 'scale('+ props.iconScale + ')' );
-
 </script>
 
 <style scoped>

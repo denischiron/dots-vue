@@ -93,7 +93,6 @@ import AppFooter from '@/components/AppFooter.vue'
 import DirectionArrows from '@/assets/images/DirectionArrows.vue'
 import fetchMetadata from '@/composables/get-metadata'
 import { getMetadataFromApi, getParentFromApi, getProjectFromApi, getAncestors } from '@/api/document'
-import { getSimpleObject } from '@/composables/utils.js'
 import { useCustomCss } from '@/composables/utils.js'
 import { mergeSettings } from '@/composables/mergeSettings'
 
@@ -118,9 +117,7 @@ export default {
     const appError = ref(null)
 
     const currCollection = ref({})
-    const appCssConfig = ref({})
     const whichTheme = ref(`${import.meta.env.VITE_APP_THEME}`.length === 0 ? 'red' : `${import.meta.env.VITE_APP_THEME}`)
-    const theme = ref('')
     const customCss = ref({})
     const scrollTopIsVisible = ref(false)
     const scrollTopOpacity = ref(0)
@@ -160,7 +157,6 @@ export default {
     const rootCollConfig = ref({})
     const projectCollConfig = ref({})
     const collConfig = ref({})
-    const rootShortTitle = ref('')
     const breadCrumb = ref([])
     const isDocProjectIdInc = `${import.meta.env.VITE_APP_DOCUMENT_ROUTE_INCLUDE_PROJECT_ID}`.toLowerCase() === 'true'
     // getting and formatting collection details
@@ -178,7 +174,7 @@ export default {
       console.log('App.vue get dtsRootCollectionId', dtsRootCollectionId.value)
     }
 
-    const getBreadcrumb = async (collId) => {
+    const getBreadcrumb = async () => {
       const ancestors = await getAncestors(currCollection.value)
       console.log('ancestors', ancestors)
       breadCrumb.value = ancestors.map((collections) => {
@@ -217,8 +213,6 @@ export default {
         : generic
       projectCollConfig.value = rootCollConfig.value
       collConfig.value = rootCollConfig.value
-      rootShortTitle.value =
-        rootCollConfig.value?.homePageSettings?.appNavBar?.collectionShortTitle ?? ''
       // Views read currentCollection.member unguarded; the ref default {} is
       // truthy and would crash them.
       currCollection.value = emptyMetadata(collId)
@@ -460,9 +454,6 @@ export default {
             return
           }
 
-          rootShortTitle.value = rootCollConfig.value
-            ? rootCollConfig.value.homePageSettings.appNavBar.collectionShortTitle
-            : appConfig.value.genericConf.homePageSettings.appNavBar.collectionShortTitle
 
           let projectCollectionOverrides =
             appConfig.value.collectionsConf.find(
@@ -678,9 +669,7 @@ export default {
         if (!footer || !btn) return
 
         const BASE_BOTTOM = 20;
-        const observer = new IntersectionObserver(([entry]) => {
-            // footer height really visible in viewport
-            const visibleFooter = entry.intersectionRect?.height || 0
+        const observer = new IntersectionObserver(() => {
             btn.style.bottom = `${ BASE_BOTTOM * opacity }px`
             btn.style.opacity = opacity;
           },{
@@ -701,19 +690,12 @@ export default {
     })
 
     return {
-      isInitializing,
-      whichTheme,
-      theme,
-      appCssConfig,
-      route,
       collConfigReady,
       appState,
       appError,
       dtsRootCollectionId,
       rootCollectionIdentifier,
-      projectCollId,
       isDocProjectIdInc,
-      rootShortTitle,
       collectionId,
       currCollection,
       appConfig,
@@ -721,13 +703,8 @@ export default {
       projectCollConfig,
       collConfig,
       routeNameCssClass,
-      setCurrentCollectionContext,
-      getBreadcrumb,
       breadCrumb,
-      getCustomCss,
-      removeCustomCss,
       scrollTopIsVisible,
-      scrollTopOpacity,
       scrollToTop
     }
   }

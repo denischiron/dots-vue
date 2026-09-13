@@ -57,7 +57,7 @@
 
 <script>
 
-import {computed, nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
+import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
 import { useRoute } from 'vue-router'
 import { router } from '@/router'
 import store from '@/store'
@@ -75,12 +75,11 @@ export default {
       type: Boolean,
       required: true
     },
-    margin: { required: true, default: 0, type: Number },
     toc: { required: true, default: () => [], type: Array },
     maxcitedepth: { required: false, default: 0, type: Number },
     refid: { required: false, default: '' }
   },
-  emits: ['updateRefId'],
+
   setup (props) {
     const isDocProjectIdInc = ref(props.isDocProjectIdIncluded)
     const currentRefId = ref(props.refid)
@@ -127,15 +126,6 @@ export default {
     }
     console.log('TOC componentTOC.value', store.state.arianeDocument, componentTOC.value)
     console.log('TOC setup expandedById.value :', expandedById.value)
-
-    // remove when proved unneeded
-    const toggleBurger = function ($event, ref) {
-      $event.preventDefault()
-      // $event.stopPropagation();
-      currentRefId.value = ref
-      // console.log("TOC ref : ", $event, currentRefId.value)
-      router.push({ path: route.path, query: { refId: ref } })
-    }
 
     const toggleExpanded = (id) => {
       console.log('TOC toggleExpanded id, expandedById.value, expandedById.value[id] : ', id, expandedById.value, expandedById.value[id])
@@ -281,7 +271,7 @@ export default {
       return { columnsCount: tocTreeScrollableColumns, columnWidth: tocTreeScrollableColumnWidth, currentColumnFloat, currentColumn }
     }
 
-    const scrollToPreviousColumn = function(event) {
+    const scrollToPreviousColumn = function() {
       const tocDetails = getColumnsDetails();
       if (tocDetails.currentColumnFloat > 0) {
         const tocTree = document.getElementById('toc-tree');
@@ -289,7 +279,7 @@ export default {
       }
     }
 
-    const scrollToNextColumn = function(event) {
+    const scrollToNextColumn = function() {
       const tocDetails = getColumnsDetails();
       if (tocDetails.currentColumnFloat < tocDetails.columnsCount - 1) {
         const tocTree = document.getElementById('toc-tree');
@@ -396,28 +386,12 @@ export default {
     })
 
     return {
-      route,
-      isDocProjectIdInc,
-      maxCiteDepth,
-      toggleBurger,
-      currentRefId,
       goTo,
       isCurrentItem,
-      expandedById,
       toggleExpanded,
       componentTOC,
       scrollToPreviousColumn,
       scrollToNextColumn
-    }
-  },
-
-  methods: {
-    getNewRefId () {
-      if (Object.keys(this.route.query).length > 0 && Object.keys(this.route.query).includes('refId')) {
-        // console.log("TOC getNewRefId /this.route.query.refId : ", this.route.query.refId ? this.route.query.refId : false)
-        this.currentRefId.value = this.route.query.refId
-      }
-      // console.log("TOC getNewRefId / this.currentRefId", this.currentRefId)
     }
   }
 }

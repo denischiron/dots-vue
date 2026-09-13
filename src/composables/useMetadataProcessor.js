@@ -8,37 +8,7 @@ const _appURL = new URL(window.location.origin)  // URL de l'app frontend
 // Extraire les 2 premiers segments de chemin de l'URL courante comme "empreinte" du document
 const _currentPathSegments = window.location.pathname.split('/').filter(Boolean).slice(0, 2).join('/')
 
-// const sources = [
-//   { name: 'wikidata', ext: 'wikidata', type: 'author_link' },
-//   { name: 'wikipedia', ext: 'wikipedia', type: 'author_link' },
-//   { name: 'dbpedia', ext: 'dbpedia.org', type: 'author_link' },
-//   { name: 'nakala', ext: 'nakala', type: 'document_link' },
-//   { name: 'idref', ext: 'idref.fr', type: 'author_link' },
-//   { name: 'databnf', ext: 'data.bnf.fr', type: 'author_link' },
-//   { name: 'cataloguebnf', ext: 'catalogue.bnf.fr', type: 'author_link' },
-//   { name: 'gallica', ext: 'gallica.bnf.fr', type: 'document_link' },
-//   { name: 'thenca', ext: 'thenca', type: 'document_link' },
-//   { name: 'hal', ext: 'hal', type: 'document_link' },
-//   { name: 'benc', ext: 'koha', type: 'document_link' },
-//   { name: 'sudoc', ext: 'sudoc.fr', type: 'document_link' },
-//   { name: 'biblissima', ext: 'biblissima', type: 'document_link' },
-//   { name: 'creativecommons', ext: 'creativecommons.org', type: 'document_link' },
-//   { name: 'etalab', ext: 'etalab.gouv', type: 'document_link' },
-//   { name: 'enc_red_small', ext: 'www.chartes.psl.eu', type: 'other_link' },
-//   { name: 'iiif', ext: 'iiif', type: 'other_link' },
-//   { name: 'dots', ext: _baseApiURL, type: 'other_link' },
-//   { name: 'elec_txt', ext: window.location.pathname.split('/').slice(1, 3).join('/'), type: 'other_link' },
-//   { name: 'tei', ext: 'tei+xml', type: 'other_link' },
-//   { name: 'html', ext: 'text/html', type: 'other_link' },
-//   { name: 'pdf', ext: 'application/pdf', type: 'other_link' }
-// ]
-/*
- { name: 'tei', ext: 'api/dts/document', type: 'other_link' },
-  { name: 'json', ext: 'api/dts/collection', type: 'other_link' },
-  { name: 'json', ext: 'api/dts/navigation', type: 'other_link' },
-   { name: 'tei', ext: 'application/tei+xml', type: 'other_link' },
-  { name: 'pdf', ext: 'application/pdf', type: 'other_link' },
-*/
+
 const DYNAMIC_RESOLVERS = {
   dots_api_base_url: () => `${import.meta.env.VITE_APP_DTS_ENDPOINT_URL}`.replace(/^https?:\/\//, ''),
   dots_vue_self: () => window.location.pathname.split('/').filter(Boolean).slice(0, 2).join('/')
@@ -156,19 +126,6 @@ jsonld.documentLoader = async (url) => {
   }
   if (defaultLoader) return defaultLoader(url)
   throw new Error(`Cannot load context: ${url}`)
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Résolution préfixe → URI (non utilisée ?)
-// ─────────────────────────────────────────────────────────────────────────────
-function resolvePrefix(term, namespaces) {
-  if (!term || !namespaces) return term
-  const colon = term.indexOf(':')
-  if (colon === -1) return term
-  const prefix = term.slice(0, colon)
-  const local  = term.slice(colon + 1)
-  const base   = namespaces[prefix]
-  return base ? base + local : term
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -316,7 +273,7 @@ async function expandMetadata(apiResponse, namespaces = {}) {
 const SCHEMA_SAMEAS_COMPRESSED = 'schema:sameAs'
 const SCHEMA_SAMEAS_URI        = 'https://schema.org/sameAs'
 // ─────────────────────────────────────────────────────────────────────────────
-// enrichValue — inchangé
+// enrichValue
 // ─────────────────────────────────────────────────────────────────────────────
 function enrichValue(value, path, sourcesMap) {
   try {
@@ -409,7 +366,7 @@ export async function buildDisplayModel(rawMetadata, config) {
   const onlyDeclared       = excludeConfig.onlyDeclared   ?? false
   const excludeAlways = excludeConfig.alwaysExclude ?? []
 
-  const { metadata: rawJsonLd, appData } = splitMetadata(rawMetadata)
+  const { metadata: rawJsonLd } = splitMetadata(rawMetadata)
   console.log('buildDisplayModel rawJsonLd', rawJsonLd)
 
   const metadata = await expandMetadata(rawJsonLd, namespaces)
@@ -574,8 +531,6 @@ export async function buildDisplayModel(rawMetadata, config) {
       continue
     }
 
-
-    //result[term] = enrichValue(val, term, sourcesMap)
     const label = renameMap[term] ?? term
     result[label] = enrichValue(val, term, sourcesMap)
 
@@ -614,7 +569,6 @@ export async function buildDisplayModel(rawMetadata, config) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // useMetadataProcessor
-// processMetadata est maintenant async
 // Sa seule responsabilité propre : enrichir avec les données TOC
 // Le reste est délégué à buildDisplayModel
 // ─────────────────────────────────────────────────────────────────────────────
@@ -694,9 +648,8 @@ function splitMetadata(raw = {}) {
 
 export function useMetadataProcessor() {
 
-  async function processMetadata(rawMetadata, collConfig, resourceId) {
+  function processMetadata(rawMetadata, resourceId) {
 
-    const config = collConfig ? toRaw(collConfig) : {}
     const raw = JSON.parse(JSON.stringify(toRaw(rawMetadata)))
 
     // Juste les alias système

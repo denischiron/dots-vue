@@ -1,6 +1,6 @@
 <template>
-  <div v-if="availableTabs.length" class="temporal-slider">
-    <div v-if="currentFacet" class="slider-content">
+  <div v-if="currentFacet" class="temporal-slider">
+    <div class="slider-content">
       <div class="slider-label">
       </div>
       <div class="temporal-inputs">
@@ -33,7 +33,7 @@
         :order="false"
         range
       >
-        <template #process="{ style, index }">
+        <template #process="{ style }">
           <div
             class="vue-slider-process"
             :style="style"
@@ -51,9 +51,9 @@ import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/antd.css'
 
 const props = defineProps({
-  temporalFacets: {
-    type: [Array,Object],
-    default: () => []
+  temporalFacet: {
+    type: Object,
+    default: null
   },
   ranges: {
     type: Object,
@@ -65,46 +65,7 @@ const emit = defineEmits([
   'change'
 ])
 
-// --------------------------
-// Backend Normalisation
-// --------------------------
-
-const availableTabs = computed(() => {
-  if (Array.isArray(props.temporalFacets)) {
-    return props.temporalFacets
-  }
-
-  if (props.temporalFacets?.fields) {
-    return props.temporalFacets.fields
-  }
-
-  if (typeof props.temporalFacets === 'object') {
-
-    return Object.entries(props.temporalFacets)
-      .map(([field,value]) => ({
-        field,
-        ...value
-      }))
-  }
-  return []
-})
-
-// --------------------------
-
-const currentFacetId = ref(null)
-
-const currentFacet = computed(() => {
-  if (!availableTabs.value.length) {
-    return null
-  }
-
-  return (
-    availableTabs.value.find(
-      facet => facet.key === currentFacetId.value
-    ) ??
-    availableTabs.value[0]
-  )
-})
+const currentFacet = computed(() => props.temporalFacet ?? null)
 
 function clampRange(min, max) {
   const availableMinValue = Number(effectiveAvailableMin.value)
@@ -139,56 +100,6 @@ function clampRange(min, max) {
 
   return [min, max]
 }
-
-// watch(
-//   () => props.temporalFacets,
-//   value => {
-//     if (value.id === 'coverage')
-//     console.log(
-//       '[TemporalSlider] temporalFacets coverage updated:',
-//      value
-//     )
-//   },
-//   {
-//     immediate: true,
-//     deep: true
-//   }
-// )
-
-watch(
-  availableTabs,
-  tabs => {
-    if (!tabs.length) {
-      currentFacetId.value = null
-      return
-    }
-
-    // Initialisation
-    if (!currentFacetId.value) {
-      currentFacetId.value = tabs[0].key
-      return
-    }
-
-    // Facet still exists : we keep it
-    const exists = tabs.some(
-      facet => facet.key === currentFacetId.value
-    )
-
-    // Otherwise select the first
-    if (!exists) {
-      currentFacetId.value = tabs[0].key
-    }
-  },
-  {
-    immediate: true
-  }
-)
-
-
-function selectFacet(facet) {
-  currentFacetId.value = facet.key
-}
-
 
 // --------------------------
 // DISPLAYED VALUES
@@ -325,7 +236,7 @@ const dotOptions = computed(() => [
 ])
 
 
-function customProcess(dotsPos) {
+function customProcess() {
 
   if (!currentFacet.value) {
     return []
@@ -556,17 +467,6 @@ const intersectionMin = computed(() => {
 
 const intersectionMax = computed(() => {
   return currentFacet.value?.intersection?.max ?? null
-})
-
-const hasIntersection = computed(() => {
-  const min = intersectionMin.value
-  const max = intersectionMax.value
-
-  return (
-    min != null &&
-    max != null &&
-    min <= max
-  )
 })
 
 watch(

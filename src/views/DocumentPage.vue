@@ -151,14 +151,13 @@
                 >
                   <div class="menu">
                     <CollectionTOC
-                      :is-doc-projectId-included="isDocProjectIdInc"
+                      :is-doc-project-id-included="isDocProjectIdInc"
                       :display-option="'toc'"
                       :dts-root-collection-identifier="dtsRootCollectionId"
                       :root-collection-identifier="rootCollectionId"
                       :application-config="appConfig"
                       :collection-config="collConfig"
                       :current-collection="selectedCollection"
-                      :margin="0"
                       :toc="selectedCollection.children"
                     />
                   </div>
@@ -175,11 +174,9 @@
                             v-if="flatTOC.length > 0"
                             :key="arianeDocument"
                             :is-doc-project-id-included="isDocProjectIdInc"
-                            :margin="0"
                             :toc="flatTOC.filter(n => n.level > 0)"
                             :maxcitedepth="TOC_DEPTH"
                             :refid="refId"
-                            @update-ref-id="getNewRefId"
                           />
                         </nav>
                       </nav>
@@ -406,11 +403,9 @@
               <TOC
                 :key="arianeDocument"
                 :is-doc-project-id-included="isDocProjectIdInc"
-                :margin="0"
                 :toc="leftTOCFragmentIsDocument && refId ? flatTOC.filter(n => n.ancestor_editorialLevel === refId) : flatTOC.filter(n => n.level > 0)"
                 :maxcitedepth="TOC_DEPTH"
                 :refid="refId"
-                @update-ref-id="getNewRefId"
               />
             </nav>
           </nav>
@@ -501,14 +496,13 @@ import {
   watch,
   provide,
   ref,
-  inject, nextTick, onBeforeUnmount
+  inject, nextTick
 } from 'vue'
 
 import { useRoute } from 'vue-router'
 import { router } from '@/router'
 import fetchMetadata from '@/composables/get-metadata.js'
 import { getSimpleObject } from '@/composables/utils.js'
-import { useMetadataProcessor } from '@/composables/useMetadataProcessor'
 import CollectionIcon from '@/assets/images/CollectionIcon.vue'
 import ResourceIcon from '@/assets/images/ResourceIcon.vue'
 import IconCircleArrow from '@/assets/images/IconCircleArrow.vue'
@@ -620,19 +614,6 @@ export default {
       }
     }
 
-    const setText = (text) => {
-      // We're going to split the string towards the end. This is just a judgment call.
-      // Since we can't dynamically change the split as the container changes size (at
-      // least, not with a lot more work), we have to pick a location that scales the
-      // ellipsis well.
-      const splitIndex = Math.round(text.length * 0.5)
-
-      return {
-        left: text.slice(0, splitIndex),
-        right: text.slice(splitIndex)
-      }
-    }
-
     const metadata = ref({})
     const route = useRoute()
     const store = useStore()
@@ -677,8 +658,6 @@ export default {
     const previousRefTitle = ref('')
     const nextRefId = ref('')
     const nextRefTitle = ref('')
-    const firstRef = ref(false)
-    const lastRef = ref(false)
 
     const selectedCollectionId = ref('')
     const selectedCollection = ref({})
@@ -828,17 +807,6 @@ export default {
           behavior: behavior
         })
       }
-    }
-
-    const arianeDocToRight = function(behavior = 'smooth') {
-      console.log('DOM arianeDocToRight', arianeDocContainer.value)
-      if (!arianeDocContainer.value) return
-      const el = arianeDocContainer.value
-
-      el.scrollTo({
-        left: el.scrollWidth,
-        behavior: behavior
-      })
     }
 
     // Maintains Document Ariane horizontal scroll on right when resizing window
@@ -1480,15 +1448,6 @@ export default {
         }
       })
       store.commit('setArianeDocument', arianeDocument.value.map(item => item.identifier))
-      getNewRefId
-    }
-
-    const itemSorted = (item) => {
-      return [...item].sort(
-        (a, b) =>
-          store.state.collectionId.indexOf(b.identifier) -
-          store.state.collectionId.indexOf(a.identifier)
-      )
     }
 
     const ancestorLabel = (ancestor) => {
@@ -1642,9 +1601,8 @@ export default {
       if (tocItem.citeType === 'Collection') {
         // Collection pure
         console.log('tocItem collConfig.value ', tocItem, collConfig.value)
-        // const { processMetadata } = useMetadataProcessor()
-        selectedCollection.value = tocItem//processMetadata(tocItem, collConfig.value, selectedCollectionId.value, route)
-        //selectedCollection.value = tocItem
+        selectedCollection.value = tocItem
+
       } else {
         // Resource = merge metadata + toc
         selectedCollection.value = _.merge(
@@ -1656,12 +1614,8 @@ export default {
 
     const getNewRefId = function () {
       console.log('getNewRefId check if refId / refId.value', refId, refId.value)
-      firstRef.value = false
-      lastRef.value = false
       layout.changeViewMode('init')
       if (refId.value) {
-        firstRef.value = false
-        lastRef.value = false
         console.log('getNewRefId flatTOC.value / editorialTypesIsValid.value', flatTOC.value, editorialTypesIsValid.value)
         // filter TOC to get only editorial level items
 
@@ -1676,7 +1630,6 @@ export default {
           // console.log("function getNewRefId this is the first item")
           previousRefId.value = ''
           previousRefTitle.value = 'Table des matières'
-          firstRef.value = true
         } else if (currentItemIndex > 0) {
           // this is not the first item in editorial levels : find previous
           // console.log('function getNewRefId this is NOT the first item : ', editorialFlatTOC[currentItemIndex - 1])
@@ -1691,7 +1644,6 @@ export default {
           // console.log('function getNewRefId this is the last item')
           nextRefId.value = ''
           nextRefTitle.value = ''
-          lastRef.value = true
         } else {
           // this is not the last item in editorial levels : find next
           // console.log('function getNewRefId this is NOT the last item : ', editorialFlatTOC[currentItemIndex + 1])
@@ -2175,10 +2127,8 @@ export default {
     return {
       dtsUrl,
       topTOCDisplayIndicator,
-      leftTOCDisplayIndicator,
       leftTOCFragmentIsDocument,
       tocCssClass: layout.tocCssClass,
-      toggleTOCContent: layout.toggleTOCContent,
       tocMenuCssClass: layout.tocMenuCssClass,
       toggleTOCMenu: layout.toggleTOCMenu,
       hasValidTOC,
@@ -2195,25 +2145,18 @@ export default {
       onDocBreadcrumbScroll,
       breadcrumbToLeft,
       breadcrumbToRight,
-      breadcrumbScrollToLastItem,
       colFadeLeftVisible,
       colFadeRightVisible,
       docFadeLeftVisible,
       docFadeRightVisible,
       arianeDocContainer,
-      arianeDocScrollToLastItem,
-      arianeDocToRight,
-      initArianeDoc,
       activeBreadcrumb,
       activeObject,
       activePanel,
-      itemSorted,
       ancestorLabel,
       metadata,
       manifestIsAvailable,
       manifest,
-      resourceManifest,
-      layout,
       resourceId,
       collection,
       isDocProjectIdInc,
@@ -2236,15 +2179,10 @@ export default {
       arianeDocument,
       refId,
       hash,
-      getNewRefId,
       previousRefId,
       previousRefTitle,
       nextRefId,
       nextRefTitle,
-      firstRef,
-      lastRef,
-      scrollTo,
-      scrollCurrentTocItemIntoView,
       isControlsOpened,
       toggleControls,
       isNotesOpened,
@@ -2253,9 +2191,7 @@ export default {
       selectStoreCollection,
       openObject,
       selectedCollectionId,
-      selectedCollection,
-      currentItem,
-      setText
+      selectedCollection
     }
   }
 }
