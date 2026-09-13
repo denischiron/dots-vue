@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+title: "dots-vue"
+abstract: >
+  A Vue 3 front-end application to browse and search TEI corpora published through
+  a DoTS (Distributed Text Services) endpoint. dots-vue navigates collection trees,
+  displays resources, documents and their metadata, renders IIIF facsimiles with
+  Mirador, and queries the dots-cli-es search API for faceted full-text search. Its
+  appearance, routing and per-collection behaviour are driven by external settings
+  repositories.
+type: software
+authors:
+  - family-names: Boby
+    given-names: Jean-Victor
+    affiliation: "École nationale des chartes – PSL"
+repository-code: "https://github.com/dots-suite/dots-vue"
+url: "https://github.com/dots-suite/dots-vue"
+license: MIT
+keywords:
+  - DTS
+  - Distributed Text Services
+  - DoTS
+  - TEI
+  - Vue.js
+  - IIIF
+  - full-text search
+  - faceted search
+  - digital humanities
+  - cultural heritage
+version: "0.7.0"
+preferred-citation:
+  type: software
+  title: "dots-vue"
+  authors:
+    - family-names: Boby
+      given-names: Jean-Victor
+      affiliation: "École nationale des chartes – PSL"
+  repository-code: "https://github.com/dots-suite/dots-vue"
+  url: "https://github.com/dots-suite/dots-vue"
+  license: MIT
+  version: "0.7.0"
