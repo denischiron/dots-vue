@@ -32,13 +32,85 @@ function describeFetchFailure (url, error) {
   return error
 }
 
+// Cached entries range from ~3 kB for a resource to ~95 kB for a project
+// collection, which carries its members. Without a bound a long browsing
+// session keeps every one of them alive, so entries are evicted
+// least-recently-used first once the budget is exceeded.
+const MAX_CACHE_BYTES = 4 * 1024 * 1024
+
+/**
+ * Map-like cache bounded by the estimated size of its values.
+ * Reading an entry marks it as the most recent; pinned keys are never evicted.
+ */
+function createBoundedCache (maxBytes) {
+  const values = new Map()
+  const sizes = new Map()
+  const pinned = new Set()
+  let totalBytes = 0
+
+  function evict () {
+    for (const key of values.keys()) {
+      if (totalBytes <= maxBytes) return
+      if (pinned.has(key)) continue
+      totalBytes -= sizes.get(key) ?? 0
+      sizes.delete(key)
+      values.delete(key)
+    }
+  }
+
+  return {
+    has: key => values.has(key),
+
+    get (key) {
+      if (!values.has(key)) return undefined
+      const value = values.get(key)
+      // re-inserting moves the key to the end: Map preserves insertion order
+      values.delete(key)
+      values.set(key, value)
+      return value
+    },
+
+    set (key, value) {
+      if (values.has(key)) {
+        totalBytes -= sizes.get(key) ?? 0
+        values.delete(key)
+      }
+      let size = 0
+      try {
+        size = JSON.stringify(value)?.length ?? 0
+      } catch {
+        size = 0
+      }
+      values.set(key, value)
+      sizes.set(key, size)
+      totalBytes += size
+      evict()
+    },
+
+    pin (key) {
+      pinned.add(key)
+    },
+
+    get bytes () {
+      return totalBytes
+    },
+
+    get size () {
+      return values.size
+    }
+  }
+}
+
 // --- Cache for getMetadataFromApi ---
-const metadataCache = new Map()
+const metadataCache = createBoundedCache(MAX_CACHE_BYTES)
 const metadataPromiseCache = new Map()
 const ROOT_KEY = Symbol('root')
 
+// Every project resolution walks up to the root collection: keep it resident.
+metadataCache.pin(ROOT_KEY)
+
 // --- Cache for getParentFromApi ---
-const parentsCache = new Map()
+const parentsCache = createBoundedCache(MAX_CACHE_BYTES)
 const parentsPromiseCache = new Map()
 
 // -------------------------------------------------------------------------
@@ -134,6 +206,7 @@ async function getMetadataFromApi (id, collConfig= null, route = null,  options 
       // checking also that realId exists (erroneous API response)
       if (!id && realId) {
         metadataCache.set(realId, simpleMetadata)
+        metadataCache.pin(realId)
       }
       let normalizedMetadata = {}
       if (collConfig && route) {
