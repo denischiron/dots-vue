@@ -17,6 +17,8 @@ Frontend application to browse a DoTS endpoint ([DoTS](https://github.com/dots-s
 [![package - Bulma](https://img.shields.io/github/package-json/dependency-version/dots-suite/dots-vue/bulma/dev?logo=bulma&logoColor=white)](https://www.npmjs.com/package/bulma)
 [![package - Mirador](https://img.shields.io/github/package-json/dependency-version/dots-suite/dots-vue/mirador/dev)](https://www.npmjs.com/package/mirador)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE.md)
+
 
 
 ## Project setup
@@ -85,3 +87,28 @@ for staging.
 ```
 yarn lint
 ```
+
+---
+
+## License
+
+dots-vue is distributed under the [MIT License](./LICENSE.md).
+
+## Citation
+
+If you use dots-vue in academic work, please cite it as:
+
+```
+@software{boby_dots_vue_2026,
+  author       = {Boby, Jean-Victor},
+  title        = {dots-vue},
+  year         = {2026},
+  publisher    = {GitHub},
+  institution  = {{École nationale des chartes}},
+  url          = {https://github.com/dots-suite/dots-vue},
+  note         = {Vue 3 front-end to browse and search TEI corpora published with DoTS}
+}
+```
+
+You can also use the repository metadata from [CITATION.cff](./CITATION.cff).
+
