@@ -453,6 +453,27 @@ article.about .page-header h1,
     margin: 0 0 10px;
   }
 
+  /* Sur écran étroit, une collection à plusieurs onglets ne tient plus sur une
+     ligne : on les empile. Le repère de l'onglet actif passe du soulignement à
+     un filet à gauche, seul bord visible dans une liste verticale. */
+  .about-page .tab-menu > div > aside {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .about-page .tab-menu > div > aside > p.menu-label,
+  .about-page .tab-menu > div > aside > p.menu-label.is-active {
+    padding: 8px 0 8px 12px;
+    text-align: left;
+    border-bottom: none;
+    border-left: solid 4px transparent;
+  }
+
+  .about-page .tab-menu > div > aside > p.menu-label.is-active {
+    border-left-color: var(--fill-color);
+  }
+
   /*
   .about table thead tr:has(:nth-child(8)) {
     display: flex;
