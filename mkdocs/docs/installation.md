@@ -7,7 +7,7 @@ it means cloning two repositories side by side — the application, and the sett
 
 | | |
 |---|---|
-| **Node.js** | 22 to 24 |
+| **Node.js** | 22 or 24 — the lines the CI builds against |
 | **Yarn** | any recent version |
 | **A DoTS endpoint** | reachable over HTTP, see [The DoTS suite](suite.md) |
 | **A search endpoint** | optional, only for the search page |

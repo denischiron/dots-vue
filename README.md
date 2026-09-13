@@ -7,7 +7,7 @@ Frontend application to browse a DoTS endpoint ([DoTS](https://github.com/dots-s
 
 **Master dependencies**:
 
-[![Node](https://img.shields.io/badge/node-22_to_24-blue?style=for-the-badge&logo=Node.js)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-22_or_24-blue?style=for-the-badge&logo=Node.js)](https://nodejs.org)
 
 [![package - vue](https://img.shields.io/github/package-json/dependency-version/dots-suite/dots-vue/vue/dev?logo=vue.js&logoColor=white)](https://www.npmjs.com/package/vue)
 [![package - vite](https://img.shields.io/github/package-json/dependency-version/dots-suite/dots-vue/dev/vite/dev?logo=vite&logoColor=white)](https://www.npmjs.com/package/vite)
