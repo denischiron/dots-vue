@@ -40,13 +40,21 @@
             :key="index"
           >
             <router-link
-              v-if="index === 0"
+              v-if="index === 0 && isDocProjectIdIncluded"
               class="level-item-external"
               active-class="active"
               :to="{ name: 'Home', params: {collId: Object.keys(item)[0]} }"
             >
               {{ Object.values(item)[0] }}
             </router-link>
+            <!-- Without the project id in routes there is no per-collection
+                 home page: the label stays, the link would lead to the root -->
+            <span
+              v-else-if="index === 0"
+              class="level-item-external"
+            >
+              {{ Object.values(item)[0] }}
+            </span>
           </template>
         </span>
       </div>
