@@ -5,6 +5,60 @@ import useApi from '@/composables/use-api'
 
 const _baseApiURL = import.meta.env.VITE_APP_ELASTICSEARCH_URL
 
+/**
+ * Every resource of a collection, in one call, from the search index.
+ * `no-highlight` asks for resources rather than passage buckets: that is both
+ * the shape a list needs and a far lighter payload.
+ *
+ * Returns null when the collection is not indexed, or when it holds more
+ * resources than one page can carry, so the caller can fall back to the DTS
+ * API. Throws on a network or HTTP failure, for the same reason.
+ */
+const collectionResourcesInFlight = new Map()
+
+export function fetchIndexedCollectionResources (collectionId, pageSize = 200, options = {}) {
+  const url = `${_baseApiURL}/search?query=&collectionId=${encodeURIComponent(collectionId)}`
+    + `&no-highlight&page[number]=1&page[size]=${pageSize}`
+
+  // The caller is a watcher on two refs, so it can fire twice for one page
+  if (collectionResourcesInFlight.has(url)) {
+    return collectionResourcesInFlight.get(url)
+  }
+
+  const request = fetch(url, { mode: 'cors', ...options })
+    .then(async response => {
+      if (!response.ok) {
+        throw new Error(`search ${response.status} on ${url}`)
+      }
+
+      const body = await response.json()
+
+      if (body.collection_indexed !== true) return null
+
+      const items = Array.isArray(body.data) ? body.data : []
+      const total = body.total_count ?? items.length
+
+      // One page is all this path asks for: until the list paginates against
+      // the server, a truncated answer would silently hide resources.
+      if (items.length < total) {
+        console.warn(
+          `use-simple-search.js fetchIndexedCollectionResources : ${collectionId} `
+          + `holds ${total} resources, above the ${pageSize} per page cap, `
+          + 'falling back to the DTS API'
+        )
+        return null
+      }
+
+      return items
+    })
+    .finally(() => {
+      collectionResourcesInFlight.delete(url)
+    })
+
+  collectionResourcesInFlight.set(url, request)
+  return request
+}
+
 export default function useSimpleSearch() {
   const store = useStore()
   const api = useApi()

@@ -1,5 +1,41 @@
 import { ref, computed, watch } from 'vue'
 
+// Walks a dotted path through an object. Each segment falls back to a
+// case-insensitive match, which is what lets a configuration written in
+// the DTS casing (`dublinCore.created`) resolve against a payload that
+// spells the namespace differently -- the ES index, when used, stores `dublincore`.
+// That fallback is the whole reason `columns` already works both against
+// the DTS API and against the search API.
+export const walkPath = (obj, path) => {
+  const parts = path.replace(/\[(\d+)\]/g, '.$1').split('.')
+
+  const read = (source, part) => {
+    if (source == null) return undefined
+
+    // Exact matching
+    if (Object.prototype.hasOwnProperty.call(source, part)) {
+      return source[part]
+    }
+
+    // Case insensitive matching
+    const matchingKey = Object.keys(source).find(
+      key => key.toLowerCase() === part.toLowerCase()
+    )
+
+    return matchingKey ? source[matchingKey] : undefined
+  }
+
+  return parts.reduce((acc, part) => {
+    if (acc == null) return undefined
+
+    if (Array.isArray(acc)) {
+      return acc.map(item => read(item, part))
+    }
+
+    return read(acc, part)
+  }, obj)
+}
+
 export function useTable(dataSource, columns, options = {}) {
   const filters = ref({})
   const sort = ref({ key: null, direction: 'none' }) // none | asc | desc
@@ -24,42 +60,6 @@ export function useTable(dataSource, columns, options = {}) {
     })
     filters.value = f
   }, { immediate: true })
-
-  // Walks a dotted path through an object. Each segment falls back to a
-  // case-insensitive match, which is what lets a configuration written in
-  // the DTS casing (`dublinCore.created`) resolve against a payload that
-  // spells the namespace differently -- the ES index, when used, stores `dublincore`.
-  // That fallback is the whole reason `columns` already works both against
-  // the DTS API and against the search API.
-  const walkPath = (obj, path) => {
-    const parts = path.replace(/\[(\d+)\]/g, '.$1').split('.')
-
-    const read = (source, part) => {
-      if (source == null) return undefined
-
-      // Exact matching
-      if (Object.prototype.hasOwnProperty.call(source, part)) {
-        return source[part]
-      }
-
-      // Case insensitive matching
-      const matchingKey = Object.keys(source).find(
-        key => key.toLowerCase() === part.toLowerCase()
-      )
-
-      return matchingKey ? source[matchingKey] : undefined
-    }
-
-    return parts.reduce((acc, part) => {
-      if (acc == null) return undefined
-
-      if (Array.isArray(acc)) {
-        return acc.map(item => read(item, part))
-      }
-
-      return read(acc, part)
-    }, obj)
-  }
 
   const getValue = (obj, path) => {
     const result = walkPath(obj, path)

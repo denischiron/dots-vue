@@ -78,6 +78,8 @@
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 
 import { getMetadataFromApi } from '@/api/document.js'
+import { fetchIndexedCollectionResources } from '@/composables/use-simple-search'
+import { walkPath } from '@/composables/useTable.js'
 import ResourcesList from '@/components/ResourcesList.vue'
 import CollectionTOC from '@/components/CollectionTOC.vue'
 import { getSimpleObject } from '@/composables/utils.js'
@@ -264,21 +266,20 @@ export default {
     const isTableLoading = ref(true)
     const resultCount = ref(0)
 
+    // Sibling collections are fetched concurrently: their latencies used to add
+    // up, one sequential round trip per sub-collection down the whole tree.
     const listOfResources = async (items, runId) => {
       if (!Array.isArray(items)) return []
-      const result = []
 
-      for (const item of items) {
-        if (runId !== currentRunId) return result
+      const parts = await Promise.all(items.map(async item => {
+        if (runId !== currentRunId) return []
 
         const type = item.type || item.citeType || item['@type']
 
         // if RESOURCE → push to results
         if (type === 'Resource') {
-
-          result.push(item)
           resultCount.value += 1
-          continue
+          return [item]
         }
 
         // if COLLECTION → get descendants
@@ -296,19 +297,18 @@ export default {
               projectIdentifier: m.projectIdentifier ?? projectId
             }))
 
-
             // recursive descendants loop
-            const children = await listOfResources(members, runId)
-
-            if (runId !== currentRunId) return result
-
-            result.push(...children)
+            return await listOfResources(members, runId)
           } catch (e) {
             console.error('HomePage listOfResources erreur API collection', collId, e)
           }
         }
-      }
-      return result
+
+        return []
+      }))
+
+      // flat() preserves the declared order of the members
+      return parts.flat()
     }
 
     const columns = computed(() => {
@@ -321,6 +321,46 @@ export default {
       return []
     })
 
+    // A search hit already carries the metadata a list needs, so one call to the
+    // index replaces walking the collection tree. Only collections that open a
+    // search page are eligible, and the DTS walk stays the fallback: the index
+    // may not hold this collection, or may not hold a column the settings ask for.
+    const isSearchable = computed(() =>
+      (collConfig.value?.customRoutes || []).some(route => route.path === 'search')
+    )
+
+    const asListRow = item => ({
+      ...item,
+      identifier: item.id ?? item.resource_id,
+      parent: item.parent_id,
+      projectIdentifier: item.path_ids?.[0] ?? item.parent_id
+    })
+
+    const coversColumns = rows =>
+      columns.value.every(column =>
+        rows.some(row => walkPath(row, column.key) != null)
+      )
+
+    const listFromSearch = async (collId, runId) => {
+      if (!isSearchable.value || !collId) return null
+
+      try {
+        const items = await fetchIndexedCollectionResources(collId)
+        if (runId !== currentRunId) return null
+        if (items === null) return null
+
+        const rows = items.map(asListRow)
+
+        if (rows.length && !coversColumns(rows)) return null
+
+        resultCount.value = rows.length
+        return rows
+      } catch (e) {
+        console.error('HomePage listFromSearch, repli sur l\'API DTS', collId, e)
+        return null
+      }
+    }
+
     watch(
     () => [componentTOC.value, displayOpt.value],
     async () => {
@@ -332,7 +372,8 @@ export default {
         let base = componentTOC.value || []
 
         if (displayOpt.value === 'list') {
-          base = await listOfResources(base, runId)
+          base = await listFromSearch(collectionId.value, runId)
+            ?? await listOfResources(base, runId)
         } else {
           base = [...base]
         }
