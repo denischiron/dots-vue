@@ -10,6 +10,9 @@ import { miradorImageToolsPlugin } from 'mirador-image-tools'
 export default function useMirador(container) {
   const _windowId = 'document'
 
+  // Désabonnement du watcher d'erreurs, réarmé à chaque initialize()
+  let unsubscribeErrors = null
+
   const baseConfig = {
     windows: [],
     window: {
@@ -64,8 +67,14 @@ export default function useMirador(container) {
       instance.miradorStore = null
     }
 
+    if (unsubscribeErrors) {
+      unsubscribeErrors()
+      unsubscribeErrors = null
+    }
+
     const config = { ...baseConfig, id: container.value.id }
     instance.miradorStore = createPluggableStore(config)
+    watchErrors()
     instance.reactRoot = ReactDOM.createRoot(container.value)
     instance.reactRoot.render(
       React.createElement(
@@ -84,6 +93,44 @@ export default function useMirador(container) {
 
     // Résoudre la promise après que React ait rendu une première fois
     return new Promise(resolve => setTimeout(resolve, 0))
+  }
+
+  // Mirador signale tout échec de requête IIIF (info.json injoignable, serveur
+  // d'images en erreur, en-tête CORS manquant) en poussant une entrée dans
+  // state.errors, que son composant ErrorDialog affiche en modale avec le
+  // message brut du navigateur : « An error occurred / TypeError: NetworkError
+  // when attempting to fetch resource ». Le lecteur ne peut rien en faire et la
+  // modale bloque la page.
+  //
+  // On retire donc l'erreur du store dès son arrivée : l'abonné s'exécutant
+  // pendant le dispatch, la modale n'a pas le temps de s'ouvrir. L'échec reste
+  // consultable en console. Le désabonnement suit le cycle de vie du store.
+  function watchErrors() {
+    if (!instance.miradorStore) return
+
+    // Erreurs déjà traitées tant que la file n'est pas vidée : garde-fou contre
+    // la réentrance, `dispatch` depuis un abonné rappelant les abonnés.
+    const handled = new Set()
+
+    unsubscribeErrors = instance.miradorStore.subscribe(() => {
+      const { errors } = instance.miradorStore.getState()
+      const ids = errors?.items ?? []
+
+      if (!ids.length) {
+        handled.clear()
+        return
+      }
+
+      const fresh = ids.filter(id => !handled.has(id))
+      if (!fresh.length) return
+
+      fresh.forEach(id => handled.add(id))
+
+      fresh.forEach(id => {
+        console.warn('use-mirador IIIF request failed: ', id, String(errors[id]?.message ?? ''))
+        instance.miradorStore.dispatch(Mirador.actions.removeError(id))
+      })
+    })
   }
 
   function updateThemeColor(color) {
@@ -242,6 +289,10 @@ export default function useMirador(container) {
   }
 
   onUnmounted(() => {
+    if (unsubscribeErrors) {
+      unsubscribeErrors()
+      unsubscribeErrors = null
+    }
     if (instance.reactRoot) {
       console.log('use-mirador unmount in onUnmounted')
       instance.reactRoot.unmount()
