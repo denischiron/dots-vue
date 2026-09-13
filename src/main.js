@@ -6,7 +6,6 @@ import { router } from '@/router'
 import store from '@/store'
 
 import useLayout from '@/composables/use-layout'
-import VueHighlightJS from 'vue3-highlightjs'
 
 window.global = window
 
@@ -16,7 +15,6 @@ const app = createApp(App).provide('variable-layout', useLayout())
   ))
   .use(router)
   .use(store)
-  .use(VueHighlightJS)
 app.mount('#app')
 /* router.isReady().then(() => {
   app.mount('#app')
