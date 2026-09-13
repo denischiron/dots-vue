@@ -33,16 +33,10 @@ export default createStore({
 
     setProjectId(state, v) {
       state.projectId = v
-
-      // cohérence search
-      state.search.projectId = v
     },
 
     setCollectionId(state, v) {
       state.collectionId = v
-
-      // cohérence search
-      state.search.collectionId = v
     },
 
     setResourceId(state, v) {
