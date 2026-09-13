@@ -1,3 +1,9 @@
+const MAX_PAGE_SIZE = 200
+const PAGE_SIZE = Math.min(
+  Math.max(Number(import.meta.env.VITE_APP_SEARCH_RESULT_PER_PAGE) || 25, 1),
+  MAX_PAGE_SIZE
+)
+
 function createEmptySearchState() {
   console.trace('searchPage createEmptySearchState')
   console.log('searchPage SEARCH MODULE INSTANCE ID', Math.random())
@@ -10,7 +16,7 @@ function createEmptySearchState() {
     ranges: {},
     sorts: '',
     pageNum: 1,
-    pageSize: 25,
+    pageSize: PAGE_SIZE,
 
     result: [],
     bucketCount: null,

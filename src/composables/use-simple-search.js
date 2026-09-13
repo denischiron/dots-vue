@@ -3,7 +3,7 @@ import { debounce } from 'lodash'
 import { useStore } from 'vuex'
 import useApi from '@/composables/use-api'
 
-const _baseApiURL = import.meta.env.VITE_ELASTICSEARCH_URL
+const _baseApiURL = import.meta.env.VITE_APP_ELASTICSEARCH_URL
 
 export default function useSimpleSearch() {
   const store = useStore()

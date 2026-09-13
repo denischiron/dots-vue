@@ -212,10 +212,6 @@ export default {
     const collConfig = computed(() => props.collectionConfig)
     const currCollection = computed(() => props.currentCollection)
 
-    const pageSize = computed(() =>
-        `${import.meta.env.VITE_SEARCH_RESULT_PER_PAGE}`
-    )
-
     const sidebarOpen = ref(false)
 
     function toggleSidebar() {
@@ -223,6 +219,8 @@ export default {
     }
 
     const search = useSimpleSearch()
+
+    const pageSize = search.pageSize
 
     const page = search.pageNum
     watch(page, value => {

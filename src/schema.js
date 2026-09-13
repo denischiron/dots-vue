@@ -14,6 +14,6 @@ export const ViteAppConfig = z
     ),
     VITE_APP_CUSTOM_SETTINGS_PATH: z.string().optional(),
     VITE_APP_THEME: z.string().optional(),
-    VITE_ELASTICSEARCH_URL: z.string().optional(),
-    VITE_SEARCH_RESULT_PER_PAGE: z.string().optional()
+    VITE_APP_ELASTICSEARCH_URL: z.string().optional(),
+    VITE_APP_SEARCH_RESULT_PER_PAGE: z.string().optional()
   })
