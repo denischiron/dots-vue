@@ -133,9 +133,6 @@ export default {
     const footDescription = ref(props.footerSettings.footerDescription)
     const collectionId = ref(props.collectionIdentifier)
     const currCollection = ref(props.currentCollection)
-    console.log('Footer setup props.collectionIdentifier / collectionId.value : ', props.collectionIdentifier, collectionId.value)
-    console.log('Footer setup props.currentCollection / currCollection.value : ', props.currentCollection, currCollection.value)
-    console.log('Footer setup footSubtitles', footSubtitles)
 
     watch(props, (newProps) => {
       collectionId.value = newProps.collectionIdentifier

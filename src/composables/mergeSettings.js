@@ -66,10 +66,8 @@ export function updateFavicon(faviconName) {
   if (faviconUrl) {
     // Apply resolved favicon URL
     link.href = faviconUrl
-    console.log('Favicon applied:', faviconUrl)
   } else {
     // Do nothing : browser will fallback to default /public/favicon.ico
-    console.log('No custom favicon found, using browser default')
   }
 }
 
@@ -109,8 +107,8 @@ export async function mergeSettings(appConfig) {
 
   // Update favicon from current settings
   const faviconName = appConfig.value.genericConf?.homePageSettings?.favicon
-  console.log('mergeSettings faviconName:', faviconName)
   updateFavicon(faviconName)
 
-  console.log('mergeSettings appConfig final:', appConfig.value)
+  console.log('mergeSettings.js mergeSettings appConfig.value :', appConfig.value)
+
 }

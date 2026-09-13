@@ -510,16 +510,6 @@ import IconNotes from '@/assets/images/IconNotes.vue'
 import TocIcon from '@/assets/images/TocIcon.vue'
 import ArianeArrowSeparatorIcon from '@/assets/images/ArianeArrowSeparatorIcon.vue'
 
-function findById (array, id) {
-  for (const item of array) {
-    if (item.identifier === id) return item
-    if (item.children?.length) {
-      const innerResult = findById(item.children, id)
-      if (innerResult) return innerResult
-    }
-  }
-}
-
 export default {
   name: 'DocumentPage',
   components: {
@@ -572,10 +562,8 @@ export default {
     const dtsRootCollectionId = ref(props.dtsRootCollectionIdentifier)
     const rootCollectionId = ref(props.rootCollectionIdentifier)
     const docProjectId = ref('')
-    console.log('topTOCDisplayIndicator test : ', topTOCDisplayIndicator)
     const appConfig = computed(() => props.applicationConfig)
     const collConfig = computed(() => props.collectionConfig)
-    console.log('DocumentPage props.collectionConfig', props.collectionConfig)
     const manifestIsAvailable = ref(false)
     const manifest = ref(null)
     const resourceManifest = ref(null)
@@ -601,7 +589,6 @@ export default {
 
       const miradorView = document.getElementById('mirador-view')
       const textView = document.getElementById('text-view')
-      console.log('Document.vue no anchor update mirador position')
       if (miradorView && textView) {
         const textViewRect = textView.getBoundingClientRect();
         const maxMarginTop = Math.max(0, textViewRect.height - miradorView.getBoundingClientRect().height);
@@ -631,7 +618,6 @@ export default {
         ? props.collectionConfig.tableOfContentsSettings.tableOfContentDepth
         : 5
     )
-    console.log('DocumentPage setup TOC_DEPTH : ', TOC_DEPTH.value)
     const editorialTypesIsValid = ref(false)
     const countEditorialTypes = ref([])
     const currentLevelIndicator = ref(false)
@@ -689,7 +675,6 @@ export default {
     const breadcrumbEl = ref(null)
 
     const updateMeasurements = function () {
-      // console.log('DOM updateMeasurements')
       if (!breadcrumbEl.value) return
 
       const el = breadcrumbEl.value
@@ -728,7 +713,6 @@ export default {
     }
 
     const breadcrumbToLeft = function() {
-      console.log('DOM breadcrumbToLeft', breadcrumbEl.value)
       if (!breadcrumbEl.value) return
       const el = breadcrumbEl.value
 
@@ -740,7 +724,6 @@ export default {
 
     // Scroll Collection Ariane to active or last Item :
     const breadcrumbScrollToLastItem = function(behavior = 'smooth') {
-      console.log('DOM breadcrumbScrollToLastItem', breadcrumbEl.value)
       if (!breadcrumbEl.value) return
       const el = breadcrumbEl.value
 
@@ -779,13 +762,11 @@ export default {
     })
 
     const docFadeRightVisible = computed(() => {
-      // console.log('DOM ariane docFadeRightVisible', docBreadcrumbScrollWidth.value > docBreadcrumbClientWidth.value && docBreadcrumbScrollLeft.value + docBreadcrumbClientWidth.value < docBreadcrumbScrollWidth.value - 1)
       return docBreadcrumbScrollWidth.value > docBreadcrumbClientWidth.value && docBreadcrumbScrollLeft.value + docBreadcrumbClientWidth.value < docBreadcrumbScrollWidth.value - 1
     })
 
     const onDocBreadcrumbScroll = (event) => {
       const target = event.target
-      // console.log('onDocBreadcrumbScroll')
       updateMeasurementsAriane()
       docBreadcrumbScrollLeft.value = target.scrollLeft
       docBreadcrumbClientWidth.value = target.clientWidth
@@ -793,7 +774,6 @@ export default {
     }
 
     const arianeDocScrollToLastItem = function(behavior = 'smooth') {
-      console.log('DOM arianeDocScrollToLastItem', arianeDocContainer.value)
       if (!arianeDocContainer.value) return
       const el = arianeDocContainer.value
 
@@ -826,7 +806,6 @@ export default {
     }
 
     const updateMeasurementsAriane = function () {
-      console.log('DOM ariane updateMeasurements', arianeDocContainer.value)
       if (!arianeDocContainer.value) return
 
       const el = arianeDocContainer.value
@@ -848,11 +827,9 @@ export default {
     const layout = inject('variable-layout')
 
     const getCurrentItem = async (origin, route) => {
-      console.log('getCurrentItem origin route', origin, route)
       if (route.params.id) {
         resourceId.value = route.params.id
         // let currentIdResponse = getMetadata(resourceId.value)
-        console.log('Setting resourceId : ', resourceId.value)
         // Check if route id param is a DoTS resourceId or a fragmentId in order to store current resourceId
         // get DotS route to identify type of Id (collection / resource / fragment)
         // if route param id is collection -> ?
@@ -862,7 +839,6 @@ export default {
 
         const response = await getMetadataFromApi(resourceId.value, null, null)
         const parentResponse = await getParentFromApi(response.identifier)
-        // console.log("parentResponse", parentResponse["member"][0])
 
         documentType.value = 'Resource'
         currentItem.value = response
@@ -877,13 +853,9 @@ export default {
         currentItem.value.editorialLevelIndicator = editorialTypes.includes(currentItem.value.citeType) ? 'toEdit' : 'renderToc'
         store.commit('setCurrentItem', currentItem.value)
         document.title = currentItem.value.title
-        console.log('init type : ', documentType.value)
-        console.log('set currentItem.value : ', currentItem.value)
 
         docProjectId.value = isDocProjectIdInc.value ? route.params.collId + '/' : ''
-        console.log('docProjectId.value ', docProjectId.value)
 
-        console.log('Objectassign collConfig.value : ', collConfig.value)
         topTOCDisplayIndicator.value = collConfig.value.tableOfContentsSettings.displayTopToc !== false
         leftTOCDisplayIndicator.value = collConfig.value.tableOfContentsSettings.displayLeftToc !== false
         leftTOCFragmentIsDocument.value = collConfig.value.tableOfContentsSettings.leftTocFragmentIsDocument !== false
@@ -901,18 +873,13 @@ export default {
 
     const getMetadata = async () => {
       const metadataResponse = await fetchMetadata('DocumentPage', resourceId.value, 'Resource', collConfig.value, route)
-      console.log('DocumentPage getMetadata metadataResponse', metadataResponse)
       Object.assign(metadata.value, metadataResponse)
     }
 
     // Setting up the Tables Of Content Top and Left
-    const getTOC = async (reason) => {
-      console.log('DocumentPage getTOC reason', reason)
-      console.log('DocumentPage getTOC resourceId.value', resourceId.value)
-      console.log('DocumentPage getTOC refId.value', refId.value)
+    const getTOC = async () => {
 
       const response = await getTOCFromApi(resourceId.value, 'Resource')
-      console.log('DocumentPage getTOC initial TOC response', response)
       if (!response.member) {
         response.member = []
       }
@@ -929,21 +896,17 @@ export default {
 
       // Fetch editorial level document parts if any (based on citeType)
       let editorialTypes = []
-      console.log('TOC collConfig.value for editorialTypes : ', collConfig.value)
       if (!!collConfig.value?.tableOfContentsSettings?.editByCiteType?.filter(Boolean).length) {
         editorialTypes = collConfig.value.tableOfContentsSettings.editByCiteType
       }
 
       // Validate that there are actually in the data
       editorialTypesIsValid.value = processFlatTOC.some(item => editorialTypes.some(l => l === item.citeType))
-      console.log('editorialTypes editorialTypesIsValid.value', editorialTypes, editorialTypesIsValid.value)
 
       // Validate the max depth of editorialTypes items and update the depth of the TOC accordingly
       const minTocDepth = Math.max(Math.max(...processFlatTOC.filter(item => editorialTypes.includes(item.citeType)).map(i => i.level)), TOC_DEPTH.value)
       TOC_DEPTH.value = minTocDepth
-      console.log('document DoTS minTocDepth : ', minTocDepth)
 
-      console.log('initial3 processFlatTOC', processFlatTOC)
 
       async function parentLoop (node) {
         if (node.parent && node.parent.length > 0 && collConfig.value.excludeCollectionIds && collConfig.value.excludeCollectionIds.length > 0) {
@@ -962,9 +925,7 @@ export default {
           if (Array.isArray(node.parent)) {
             // multiple parents
             for (let i = 0; i < node.parent.length; i += 1) {
-              console.log('appendParentInTOC / node.parent / p', node.parent, node.parent[i])
               const appendParentInTOC = await getMetadataFromApi(node.parent[i], null, null)
-              console.log('appendParentInTOC', appendParentInTOC)
               const parentResponse = await getParentFromApi(appendParentInTOC.identifier)
               // Compute parent level from current node
               parentResponse.level = node.level - 1
@@ -1031,7 +992,6 @@ export default {
             }
           } else {
             const appendParentInTOC = await getMetadataFromApi(node.parent, null, null)
-            console.log('appendParentInTOC else', appendParentInTOC)
 
             const parentResponse = await getParentFromApi(appendParentInTOC.identifier)
             // Compute parent level from current node
@@ -1102,18 +1062,14 @@ export default {
 
       await parentLoop(store.state.currentItem)
 
-      console.log('setup afterParents processFlatTOC : ', processFlatTOC)
 
       // Move ultimate ancestor to first position
 
       const ultimateAncestor = processFlatTOC.filter(item => item.parent === null)[0]
-      console.log('setup afterParents find ultimate ancestor = rootCollection : ', ultimateAncestor)
       const ultimateAncestorIndex = processFlatTOC.findIndex(item => item.parent === null)
-      console.log('setup afterParents find ultimate ancestor : ', processFlatTOC, ultimateAncestor, ultimateAncestorIndex)
 
       processFlatTOC.splice(ultimateAncestorIndex, 1)
       processFlatTOC.unshift(ultimateAncestor)
-      console.log('setup afterParents find ultimate ancestor after: ', processFlatTOC, ultimateAncestor, ultimateAncestorIndex)
       // identify the last fragment level for which metadata are available to create a TOC element title
       const titleMissing = (node) => {
         if (node.title) {
@@ -1128,12 +1084,9 @@ export default {
           return false
         }
       }
-      console.log('document DoTS titleMissing debug ...processFlatTOC.filter(i => !titleMissing(i)) : ', processFlatTOC.filter(i => !titleMissing(i)))
-      console.log('document DoTS titleMissing debug ...processFlatTOC.filter(i => !titleMissing(i)).length : ', processFlatTOC.filter(i => !titleMissing(i)).length)
       const maxTocDepth = processFlatTOC.filter(i => !titleMissing(i)).length === 0
         ? Math.max(...processFlatTOC.map(i => i.level))
         : Math.max(...processFlatTOC.filter(i => !titleMissing(i)).map(item => item.level)) - 1
-      console.log('document DoTS maxTocDepth : ', maxTocDepth)
 
       // check if there is an editorial level set up by the user in the collection configuration
       //editorialLevel.value = collConfig.value?.tableOfContentsSettings?.editByLevel ?? 0
@@ -1141,26 +1094,16 @@ export default {
         editorialLevel.value = collConfig.value[0].tableOfContentsSettings.editByLevel
       } */
 
-      console.log('USER editorialLevel.value / typeof : ', editorialLevel.value, typeof (editorialLevel.value))
       editorialLevel.value = editorialLevel.value > maxTocDepth ? maxTocDepth : editorialLevel.value
-      console.log('VALIDATED editorialLevel.value / typeof : ', editorialLevel.value, typeof (editorialLevel.value))
 
-      console.log('currentLevel / typeof : ', currentLevel, typeof (currentLevel.value))
       // in any case, max the TOC depth (available or user driven) by the availability of fragment title metadata
-      console.log('TOC_DEPTH.value / typeof : ', TOC_DEPTH.value, typeof (TOC_DEPTH.value))
       // TOC_DEPTH.value = TOC_DEPTH.value > maxTocDepth ? maxTocDepth : TOC_DEPTH.value
 
       if (refId.value) {
-        console.log('there is a refId , update currentLevel', processFlatTOC.filter(item => item.identifier === refId.value)[0].level)
         currentLevel.value = processFlatTOC.filter(item => item.identifier === refId.value)[0].level
-        console.log('there is a refId , updated currentLevel', currentLevel.value)
       } else {
-        console.log('there is NO refId , update currentLevel to 0', 0)
         currentLevel.value = 0
-        console.log('there is NO refId , updated currentLevel', currentLevel.value)
       }
-
-      const startTimeBuildTOC = new Date()
 
       // Initialise the children of the flatTOC fragments (descendant of the resource)
       processFlatTOC.filter(item => item.level >= 0).forEach((node) => { node.children = [] })
@@ -1185,24 +1128,20 @@ export default {
       }
 
       processFlatTOC.filter(item => item.level >= 0).forEach(node => countDescendants(node))
-      console.log('processFlatTOC', processFlatTOC)
       if (editorialTypesIsValid.value) {
         processFlatTOC.filter(item => editorialTypes.includes(item.citeType)).forEach((node) => {
           node.editorialLevelIndicator = 'toEdit'
           if (node.level < 0) {
             node.url = `${window.location.origin}${import.meta.env.VITE_APP_APP_ROOT_URL.length > 1 ? import.meta.env.VITE_APP_APP_ROOT_URL + '/' : import.meta.env.VITE_APP_APP_ROOT_URL}${route.path.slice(1, route.path.length)}/${node.identifier}`
             node.router = node.identifier
-            //console.log('addFlag on node.level editorialTypes.includes(item.citeType) : < 0', node)
           } else if (node.level === 0) {
             node.url = `${window.location.origin}${import.meta.env.VITE_APP_APP_ROOT_URL.length > 1 ? import.meta.env.VITE_APP_APP_ROOT_URL + '/' : import.meta.env.VITE_APP_APP_ROOT_URL}${route.path.slice(1, route.path.length)}`
             node.router = node.identifier
-            //console.log('addFlag on node.level editorialTypes.includes(item.citeType) : = 0', node)
           } else {
             node.url = `${window.location.origin}${import.meta.env.VITE_APP_APP_ROOT_URL.length > 1 ? import.meta.env.VITE_APP_APP_ROOT_URL + '/' : import.meta.env.VITE_APP_APP_ROOT_URL}${route.path.slice(1, route.path.length)}?refId=${node.identifier}`
             node.router = `${route.params.id}?refId=${node.identifier}`
             node.router_params = route.params.id
             node.router_refid = node.identifier
-            //console.log('addFlag on node.level editorialTypes.includes(item.citeType) : > 0 ', node)
           }
         })
       } else {
@@ -1246,9 +1185,7 @@ export default {
           }
         }
       }
-      console.log('processFlatTOCtoEdit', processFlatTOC.filter(item => item.editorialLevelIndicator === 'toEdit'))
       const toEditIds = processFlatTOC.filter(item => item.editorialLevelIndicator === 'toEdit').map(node => node.identifier)
-      console.log('processFlatTOCHash', processFlatTOC.filter(item => toEditIds.includes(item.parent)))
       processFlatTOC.filter(item => toEditIds.includes(item.parent)).forEach(node => {
         flagDescendants(node, node.parent)
       })
@@ -1263,61 +1200,39 @@ export default {
           }
           node.router = node.identifier
           node.router_params = node.identifier
-          //console.log('addFlag on node.level <0 : ', node)
         } else if (node.level === 0) {
           node.url = `${window.location.origin}${import.meta.env.VITE_APP_APP_ROOT_URL.length > 1 ? import.meta.env.VITE_APP_APP_ROOT_URL + '/' : import.meta.env.VITE_APP_APP_ROOT_URL}${route.path.slice(1, route.path.length)}`
           node.router = node.identifier
           node.router_params = node.identifier
-          //console.log('addFlag on node.level === 0 : ', node)
         } else {
           node.url = `${window.location.origin}${import.meta.env.VITE_APP_APP_ROOT_URL.length > 1 ? import.meta.env.VITE_APP_APP_ROOT_URL + '/' : import.meta.env.VITE_APP_APP_ROOT_URL}${route.path.slice(1, route.path.length)}?refId=${node.identifier}`
           node.router = `${route.params.id}?refId=${node.identifier}`
           node.router_params = route.params.id
           node.router_refid = node.identifier
-          if (node.identifier === 'a1') {
-            //console.log('addFlag on node.level > 0 node.url ', node.url, '\n', window.location.origin, '\n', import.meta.env.VITE_APP_APP_ROOT_URL, '\n', route.path)
-          }
-          //console.log('addFlag on node.level > 0 : ', node)
         }
       })
 
       if (editorialTypesIsValid.value) {
         topTOC.value = processFlatTOC
-        // console.log('flatTOC.value updated after editorialType : ', flatTOC.value)
-        console.log('processFlatTOC updated after editorialType : ', processFlatTOC)
-        console.log('topTOC.value based on editorialType : ', topTOC.value)
       }
       flatTOC.value = processFlatTOC
 
       if (refId.value) {
-        console.log('there is a refId , update currentLevelIndicator.value', currentLevelIndicator.value)
         currentLevelIndicator.value = flatTOC.value.find(i => i.identifier === refId.value).editorialLevelIndicator
-        console.log('there is a refId , updated currentLevelIndicator.value', currentLevelIndicator.value)
       } else {
-        console.log('there is NO refId , update currentLevelIndicator.value', currentLevelIndicator.value)
         currentLevelIndicator.value = flatTOC.value.find(i => i.identifier === resourceId.value).editorialLevelIndicator
-        console.log('there is NO refId , updated currentLevelIndicator.value', currentLevelIndicator.value)
       }
-
-      const endTimeBuildTOC = new Date()
-      //console.log('TimeBuildTOC : ', endTimeBuildTOC - startTimeBuildTOC)
-      console.log(`TimeBuildTOC : ${((endTimeBuildTOC - startTimeBuildTOC) / 1000).toFixed(3)} s`)
 
 
       if (!editorialTypesIsValid.value) {
         // topTOC.value = list_to_tree(flatTOC.value, editorialLevel.value)
         topTOC.value = processFlatTOC.filter(item => item.level >= 0)
-        console.log('topTOC.value based on levels : ', topTOC.value)
       } else {
         topTOC.value = processFlatTOC.filter(item => item.level >= 0)
-        console.log('topTOC.value based on editorialLevel : ', topTOC.value)
       }
       if (refId.value) {
-        console.log('there is a refId , update currentLevelIndicator.value', currentLevelIndicator.value)
         currentLevelIndicator.value = flatTOC.value.find(i => i.identifier === refId.value).editorialLevelIndicator
-        console.log('there is a refId , updated currentLevelIndicator.value', currentLevelIndicator.value)
 
-        console.log('bottomTOC cas 2 search RefId item in TOC and return children : ', findById(topTOC.value, refId.value).children)
         // select flatTOC elements between the current matching refId and the last element belonging to the same parent
         const followingElementInTreeLimb = flatTOC.value.findIndex(i => i.identifier === refId.value) + 1
         const allFollowingElementsInTOC = flatTOC.value.slice(followingElementInTreeLimb, flatTOC.value.length)
@@ -1327,18 +1242,14 @@ export default {
         const currentMatchingElementIndex = flatTOC.value.findIndex(i => i.identifier === refId.value)
         // assign portion of topTOC to the bottomTOC and unlink the variables
         bottomTOC.value = JSON.parse(JSON.stringify(flatTOC.value.slice(followingElementInTreeLimb, lastElementInTreeLimb + currentMatchingElementIndex)))
-        console.log('bottomTOC cas 2 :', bottomTOC.value, topTOC.value)
       } else {
-        console.log('there is NO refId , update currentLevelIndicator.value', currentLevelIndicator.value)
         currentLevelIndicator.value = flatTOC.value.find(i => i.identifier === resourceId.value).editorialLevelIndicator
-        console.log('there is NO refId , updated currentLevelIndicator.value', currentLevelIndicator.value)
         // assign portion of topTOC to the bottomTOC and unlink the variables
         bottomTOC.value = JSON.parse(JSON.stringify(topTOC.value.filter(i => i.level > 0)))
-        console.log('bottomTOC cas 3 :', bottomTOC.value, topTOC.value)
       }
       await setBreadcrumbs()
-      console.log('getTOC result topTOC : ', topTOC.value)
-      console.log('getTOC result bottomTOC : ', bottomTOC.value)
+      console.log('DocumentPage.vue getTOC topTOC :', topTOC.value)
+      console.log('DocumentPage.vue getTOC bottomTOC :', bottomTOC.value)
       store.commit('setTOC', flatTOC.value)
       isLoading.value = true
     }
@@ -1346,9 +1257,7 @@ export default {
     const setBreadcrumbs = async () => {
       const ancestors = await getAncestors(currentItem.value, collConfig.value.excludeCollectionIds || [])
 
-      console.log('setBreadcrumbs start')
       const currentItemId = hash.value ? hash.value : refId.value ? refId.value : resourceId.value
-      console.log('ancestors currentItemId : ', flatTOC.value, hash.value, refId.value, resourceId.value, currentItemId)
 
       function findAncestors (item, directory) {
         if (item.parent === null) return [item]
@@ -1357,15 +1266,12 @@ export default {
           // Multiple parents
           for (let i = 0; i < item.parent.length; i += 1) {
             const parentId = item.parent[i]
-            // console.log("findAncestors item.parent", item.parent, i, item.parent[i])
             parent.push(directory.find(i => i.identifier === parentId))
-            // console.log("findAncestors parent list", directory.find(i => i.identifier === parentId))
           }/*
         parent.push(directory.find(i => i.identifier === item.parent[0])) */
         } else {
           parent.push(directory.find(i => i.identifier === item.parent))
         }
-        // console.log("findAncestors item, parent", item, parent)
 
         return [
           item,
@@ -1374,23 +1280,12 @@ export default {
         ].flat()
       }
 
-      console.log('ancestors flatTOC.value', flatTOC.value)
-
-      const startTimeBuildAncestors = new Date()
-
-      if (editorialTypesIsValid.value) {
-        console.log('ancestors editorialTypesIsValid.value', editorialTypesIsValid.value, currentItemId)
-        console.log('flatTOC.value debug', flatTOC.value.filter(item => item.identifier === currentItemId))
-        // Filter the TOC down to the item we care about based on currentItemId
-      } else {
-        console.log('ancestors based on levels ')
-      }
 
       // Build the collections breadcrumb
       arianeCollection.value = ancestors.reverse().map((elem) => {
         return elem.filter((e) => e.citeType === 'Collection' || e.citeType === 'Resource')
       }).filter((e) => e.length > 0)
-      /*if (arianeCollection.value.length <= 2) {q
+      /*if (arianeCollection.value.length <= 2) {
         activeBreadcrumb.value = 0
         console.log('arianeCollection test : ', arianeCollection.value.slice(-1), activeBreadcrumb.value)
         openObject(arianeCollection.value.slice(-1)[0][0], 0)
@@ -1417,31 +1312,21 @@ export default {
       // Sorting by increasing level
         .sort((a, b) => a.level - b.level)
 
-      console.log('getAncestor arianeDocument.value', arianeDocument.value)
-
-      const endTimeBuildAncestors = new Date()
-      console.log('getAncestor TimeBuildAncestor : ', endTimeBuildAncestors - startTimeBuildAncestors)
 
       if (store.state.arianeDocument && store.state.arianeDocument.length > 0) {
         store.state.arianeDocument.forEach((id) => {
-          // console.log('getAncestor ariane cancel loop ', iter)
           if (flatTOC.value.find(node => node.identifier === id)) {
-            // console.log('getAncestor ariane found in topTOC', findById(topTOC.value, iter.identifier))
             flatTOC.value.find(node => node.identifier === id).expanded = false
             if (flatTOC.value.filter(node => node.parent === id || node.ancestor_editorialLevel === id).length > 0) {
               flatTOC.value.filter(node => node.parent === id || node.ancestor_editorialLevel === id).forEach(n => { n.show = false })
             }
-            // console.log('getAncestor ariane updated expanded topTOC', findById(topTOC.value, iter.identifier))
           }
         })
       }
 
       arianeDocument.value.forEach((item) => {
-        // console.log('getAncestor ariane add loop : ', iter)
         if (flatTOC.value.find(node => node.identifier === item.identifier)) {
-          // console.log('getAncestor ariane add found in topTOC', findById(topTOC.value, iter.identifier))
           flatTOC.value.find(node => node.identifier === item.identifier).expanded = true
-          // console.log('getAncestor ariane add updated expanded topTOC', findById(topTOC.value, iter.identifier))
         }
       })
       store.commit('setArianeDocument', arianeDocument.value.map(item => item.identifier))
@@ -1523,7 +1408,6 @@ export default {
       )
 
       if (label) {
-        console.log('ancestorLabel label', label)
         return label
       }
 
@@ -1532,7 +1416,6 @@ export default {
         appConfig.value?.genericConf?.topBreadcrumbButtonLabel
       )
 
-      console.log('ancestorLabel defaultLabel', defaultLabel)
 
       if (defaultLabel) {
         return defaultLabel
@@ -1542,12 +1425,9 @@ export default {
     }
 
     function selectStoreCollection(levelListItems) {
-      console.log('selectStoreCollection levelListItems', levelListItems)
       if (store.state.collectionId && levelListItems.every(coll => coll.citeType === 'Collection')) {
-        console.log('selectStoreCollection multiple items returning context coll', levelListItems.find(coll => coll.identifier === store.state.collectionId))
         return levelListItems.find(coll => coll.identifier === store.state.collectionId)
       } else {
-        console.log('selectStoreCollection returning unique item', levelListItems)
         return levelListItems
       }
     }
@@ -1555,7 +1435,6 @@ export default {
     function openObject(breadcrumbItem, index, event) {
 
       // Case 1 : same breadcrumb then toggle off
-      // console.log('arianeCollection test openObject ', activeBreadcrumb.value, index, breadcrumbItem.identifier)
       if (
         activeBreadcrumb.value === index &&
         selectedCollectionId.value === breadcrumbItem.identifier
@@ -1597,7 +1476,6 @@ export default {
 
       if (tocItem.citeType === 'Collection') {
         // Collection pure
-        console.log('tocItem collConfig.value ', tocItem, collConfig.value)
         selectedCollection.value = tocItem
 
       } else {
@@ -1610,45 +1488,34 @@ export default {
     }
 
     const getNewRefId = function () {
-      console.log('getNewRefId check if refId / refId.value', refId, refId.value)
       layout.changeViewMode('init')
       if (refId.value) {
-        console.log('getNewRefId flatTOC.value / editorialTypesIsValid.value', flatTOC.value, editorialTypesIsValid.value)
         // filter TOC to get only editorial level items
 
         const refIdTOC = flatTOC.value.filter(item => { return ((item.editorialLevelIndicator === 'renderToc' && item.level > 0) || item.editorialLevelIndicator === 'toEdit') })
-        console.log('function getNewRefId editorialFlatTOC test', refIdTOC)
         const currentItem = refIdTOC.find(item => item.identifier === refId.value)
-        console.log('function getNewRefId currentItem', currentItem)
         const currentItemIndex = currentItem && (typeof currentItem !== 'undefined') ? refIdTOC.findIndex(item => item.identifier === refId.value) : -1
-        console.log('function getNewRefId currentItemIndex', currentItemIndex)
         if (currentItemIndex === 0) {
           // this is the first item in editorial levels
-          // console.log("function getNewRefId this is the first item")
           previousRefId.value = ''
           previousRefTitle.value = 'Table des matières'
         } else if (currentItemIndex > 0) {
           // this is not the first item in editorial levels : find previous
-          // console.log('function getNewRefId this is NOT the first item : ', editorialFlatTOC[currentItemIndex - 1])
           previousRefId.value = refIdTOC[currentItemIndex - 1].identifier
           previousRefTitle.value = refIdTOC[currentItemIndex - 1].title
             ? refIdTOC[currentItemIndex - 1].title
             : refIdTOC[currentItemIndex - 1].citeType + ' ' + refIdTOC[currentItemIndex - 1].identifier
-            // console.log('function getNewRefId previousRefId.value : ', previousRefId.value)
         }
         if (currentItemIndex === refIdTOC.length - 1) {
           // this is the last item in editorial levels
-          // console.log('function getNewRefId this is the last item')
           nextRefId.value = ''
           nextRefTitle.value = ''
         } else {
           // this is not the last item in editorial levels : find next
-          // console.log('function getNewRefId this is NOT the last item : ', editorialFlatTOC[currentItemIndex + 1])
           nextRefId.value = refIdTOC[currentItemIndex + 1].identifier
           nextRefTitle.value = refIdTOC[currentItemIndex + 1].title
             ? refIdTOC[currentItemIndex + 1].title
             : refIdTOC[currentItemIndex + 1].citeType + ' ' + refIdTOC[currentItemIndex + 1].identifier
-          // console.log('function getNewRefId nextRefId.value : ', nextRefId.value)
         }
       } else if ( flatTOC.value.filter(item => { return ((item.editorialLevelIndicator === 'renderToc' && item.level >= 0) || item.editorialLevelIndicator === 'toEdit')}).length > 1 ) {
         previousRefId.value = ''
@@ -1679,7 +1546,6 @@ export default {
 
     const getIiifManifestUrl = () => {
       const resourceIIIFManifest = metadata.value?.extensions?.['dots:resourceIIIFManifest']
-      console.log('getIiifManifestUrl metadata.value.extensions["dots:resourceIIIFManifest"] : ', resourceIIIFManifest)
       if (!resourceIIIFManifest) {
         return null
       }
@@ -1696,7 +1562,6 @@ export default {
 
       // cas objet simple
       // if (resourceIIIFManifest?.source?.name === 'iiif') {
-      //   console.log('getIiifManifestUrl debug resourceIIIFManifest', resourceIIIFManifest)
       //   return resourceIIIFManifest.url
       // }
 
@@ -1713,7 +1578,6 @@ export default {
       }
 
       resourceManifest.value = await response.json()
-      console.log('mirador loadResourceManifest resourceManifest:', resourceManifest.value)
     }
 
     let _currentLoadId = 0
@@ -1734,13 +1598,11 @@ export default {
           // => charger le manifeste de l'item ciblé
 
           if (refId.value) {
-            console.log('mirador updateDisplayedManifest refId/currentItem', refId.value, currentItem.value)
 
             const currentRes = flatTOC.value.find(
               item => item.identifier === refId.value
             )
 
-            console.log('mirador updateDisplayedManifest refId/currentRes', refId.value, currentRes)
 
             const docManifestURL =
               currentRes?.extensions?.['dots:resourceIIIFManifest']
@@ -1754,7 +1616,6 @@ export default {
             const response = await fetch(docManifestURL)
 
             if (loadId !== _currentLoadId) {
-              console.log('updateDisplayedManifest cancelled', loadId)
               return
             }
 
@@ -1767,14 +1628,12 @@ export default {
             const manifestJson = await response.json()
 
             if (loadId !== _currentLoadId) {
-              console.log('updateDisplayedManifest cancelled after json', loadId)
               return
             }
 
             manifest.value = manifestJson
             manifestIsAvailable.value = true
 
-            console.log('mirador updateDisplayedManifest resourceManifest.value manifest:', resourceManifest.value, manifest.value)
 
             if (miradorInstance.miradorStore) {
               miradorInstance.loadManifest(
@@ -1802,7 +1661,6 @@ export default {
         manifest.value = resourceManifest.value
         manifestIsAvailable.value = true
 
-        console.log('mirador updateDisplayedManifest manifest:', manifest.value)
 
         if (miradorInstance.miradorStore) {
           miradorInstance.loadManifest(manifest.value, manifest.value?.items?.[0]?.id)
@@ -1810,7 +1668,6 @@ export default {
 
       } catch (error) {
         if (loadId !== _currentLoadId) {
-          console.log('updateDisplayedManifest cancelled in catch', loadId)
           return
         }
 
@@ -1825,13 +1682,11 @@ export default {
     watch(
       () => layout.getViewMode?.(),
       (newValue, oldValue) => {
-        console.log('mirador layout.getViewMode watch ', oldValue, newValue)
         const entersImageMode =
           !oldValue?.includes?.('image') &&
           newValue?.includes?.('image')
 
         if (entersImageMode) {
-          console.log('mirador entersImageMode resetView button')
           nextTick(() => {
             miradorInstance.resetView()
           })
@@ -1842,7 +1697,6 @@ export default {
     watch(
       () => metadata.value?.extensions?.['dots:resourceIIIFManifest'],
       async (newVal) => {
-        console.log('mirador watch resourceIIIFManifest', metadata.value?.extensions)
 
         if (!newVal) {
           layout.imageIsAvailable.value = false
@@ -1869,8 +1723,7 @@ export default {
 
     watch(
       () => refId.value,
-      async (newRefId, oldRefId) => {
-        console.log('watch mirador updateDisplayedManifest refId', oldRefId, '->', newRefId)
+      async () => {
 
         //if (resourceManifest.value?.type === 'Collection') {
           await updateDisplayedManifest()
@@ -1917,43 +1770,32 @@ export default {
     watch(
       router.currentRoute, async (newRoute, oldRoute) => {
         isLoading.value = false
-        console.log('DocumentPage watch route.params : ', route.params)
-        console.log('DocumentPage watch route.query : ', route.query)
-        console.log('DocumentPage watch route.hash : ', route.hash)
-        console.log('DocumentPage watch router oldRoute, newRoute : ', oldRoute, newRoute)
 
         if (newRoute && oldRoute && newRoute.params.id !== oldRoute.params.id) {
           await getCurrentItem('watch getCurrentItem : route : ', newRoute)
-          console.log('DocumentPage watch route change, resource DID change :', refId.value)
           await getTOC('watch query')
           await getMetadata()
           getNewRefId()
           isLoading.value = true
           if (newRoute.hash && newRoute.hash.length > 0) {
             hash.value = newRoute.hash
-            console.log('DocumentPage watch scrollTo hash : ', hash.value)
             scrollTo()
           }
         } else if (newRoute && oldRoute && newRoute.params.id === oldRoute.params.id) {
-          console.log('DocumentPage watch route change but resource DID NOT change ', oldRoute, newRoute)
           // await getCurrentItem("watch getCurrentItem : route : ", newRoute)
           // await getTOC("watch query")
           if (newRoute.query.refId === oldRoute.query.refId) {
-            console.log('DocumentPage watch route change but resource/refId DID NOT change ', oldRoute, newRoute)
             hash.value = newRoute.hash && newRoute.hash.length > 0 ? newRoute.hash.replace('#', '') : false
 
             if (newRoute.hash && newRoute.hash.length > 0) {
-              console.log('DocumentPage watch scrollTo hash : ', hash.value)
               scrollTo()
             } else {
               // Scroll to top if no anchor
-              console.log('scrollBehavior DocumentPage watch no anchor scrollTo Page TOP')
               // window.scrollTo({ top: 0, behavior: 'instant' })
             }
             isLoading.value = true
           } else {
             hash.value = newRoute.hash && newRoute.hash.length > 0 ? newRoute.hash.replace('#', '') : false
-            console.log('DocumentPage watch route change refId changed oldRoute, newRoute, hash.value ', oldRoute, newRoute, hash.value)
             refId.value = newRoute.query.refId
             // await getCurrentItem('watch getCurrentItem : route : ', newRoute)
             // await getTOC("watch query")
@@ -1965,67 +1807,49 @@ export default {
               ? flatTOC.value.find(i => i.identifier === refId.value).editorialLevelIndicator
               : flatTOC.value.find(i => i.identifier === resourceId.value).editorialLevelIndicator
 
-            console.log('watch query : currentLevelIndicator.value debug', currentLevelIndicator.value)
-            console.log('watch query : refId', refId.value)
             if (refId.value) {
               // select flatTOC elements between the current matching refId and the last element belonging to the same parent
               const followingElementInTreeLimb = flatTOC.value.findIndex(i => i.identifier === refId.value) + 1
-              // console.log('watch query : bottomTOC debug followingElementInTreeLimb', followingElementInTreeLimb)
               const allFollowingElementsInTOC = flatTOC.value.slice(followingElementInTreeLimb, flatTOC.value.length)
-              // console.log('watch query : bottomTOC debug allFollowingElementsInTOC', allFollowingElementsInTOC)
               const lastElementInTreeLimb = allFollowingElementsInTOC.findIndex(i => i.parent === flatTOC.value.find(i => i.identifier === refId.value).parent) !== -1 ? allFollowingElementsInTOC.findIndex(i => i.parent === flatTOC.value.find(i => i.identifier === refId.value).parent) + 1 : allFollowingElementsInTOC.length
-              // console.log('watch query : bottomTOC debug lastElementInTreeLimb', lastElementInTreeLimb)
               const currentMatchingElementIndex = flatTOC.value.findIndex(i => i.identifier === refId.value)
-              // console.log('watch query : bottomTOC debug currentMatchingElementIndex', currentMatchingElementIndex)
               // assign portion of topTOC to the bottomTOC and unlink the variables
               bottomTOC.value = JSON.parse(JSON.stringify(flatTOC.value.slice(followingElementInTreeLimb, lastElementInTreeLimb + currentMatchingElementIndex)))
             } else {
               // assign portion of topTOC to the bottomTOC and unlink the variables
               bottomTOC.value = JSON.parse(JSON.stringify(topTOC.value.filter(i => i.level > 0)))
             }
-            console.log('watch query : bottomTOC debug flatTOC', flatTOC.value)
-            console.log('watch query : bottomTOC debug', bottomTOC.value)
-            console.log('watch query : bottomTOC debug flatTOC.value.findIndex(i => i.identifier === refId.value) + 1', refId.value ? flatTOC.value.findIndex(i => i.identifier === refId.value) + 1 : 'no refId')
-            console.log('watch query : bottomTOC debug flatTOC.value.findIndex next parent in ', refId.value ? flatTOC.value.slice(flatTOC.value.findIndex(i => i.identifier === refId.value) + 1, flatTOC.value.length).findIndex(i => i.parent === flatTOC.value.find(i => i.identifier === refId.value).parent) + 1 + flatTOC.value.findIndex(i => i.identifier === refId.value) + 1 : 'no refId')
             getNewRefId()
             isLoading.value = true
           }
         } else if (typeof oldRoute === 'undefined') {
           await getCurrentItem('watch getCurrentItem : route : ', route)
-          console.log('DocumentPage watch NO newRoute : oldRoute, newRoute = route ', oldRoute, route)
           await getTOC('watch query')
           await getMetadata()
           getNewRefId()
           isLoading.value = true
-        } else {
-          console.log('DocumentPage watch TEST : oldRoute, newRoute ', oldRoute, newRoute)
         }
       }, { deep: true, immediate: true }
     )
 
     watch(hasValidTOC, (val) => {
-      console.log('hasValidTOC changed:', val)
       if (!val && layout.isTOCMenuOpened.value) {
         layout.isTOCMenuOpened.value = false
       }
     })
 
-    watch(breadcrumbEl, (val) => {
-      console.log('DOM breadcrumbEl changed:', val)
+    watch(breadcrumbEl, () => {
       updateMeasurements()
     })
 
-    watch(arianeDocContainer, (val) => {
-      console.log('DOM arianeDocContainer changed:', val)
+    watch(arianeDocContainer, () => {
       updateMeasurementsAriane()
     })
-    watch(arianeDocument, (val) => {
-      console.log('DOM arianeDocContainer updated:', val)
+    watch(arianeDocument, () => {
       nextTick().then(initArianeDoc)
     })
 
-    watch(breadcrumbEl, (val) => {
-      console.log('DOM breadcrumbEl updated:', val)
+    watch(breadcrumbEl, () => {
       nextTick().then(breadcrumbScrollToLastItem)
     })
 
@@ -2033,26 +1857,10 @@ export default {
       // Cf router/indes.js => scrollBehavior
 
       // If the selected item is an anchor, capture and scroll to that anchor
-      console.log('DocumentPage.vue scrollTo on resolve hash : ', hash.value)
       if (hash.value.length > 0) {
         // Bump the hash to ensure change detection
         const bumpPath = `${import.meta.env.VITE_APP_APP_ROOT_URL}`.length <= 1 ? `${router.currentRoute.value.fullPath.split('#')[0]}#${hash.value}` : `${import.meta.env.VITE_APP_APP_ROOT_URL}${router.currentRoute.value.fullPath.split('#')[0]}#${hash.value}`
         history.replaceState(history.state, '', bumpPath)
-
-        // Target element and scroll
-        const el = document.getElementById(hash.value)
-        console.log('DocumentPage.vue scrollTo el : ', el)
-        if (el) {
-          const yOffset = -90
-          const y = el.getBoundingClientRect().top + window.scrollY + yOffset
-          console.log('DocumentPage.vue scrollTo y : ', y)
-          // window.scrollTo({ top: y, behavior: 'smooth' })
-          // el.scrollIntoView({ behavior: 'smooth' })
-        }
-      } else {
-        // Scroll to top if no anchor
-        console.log('DocumentPage.vue scrollTo 0, no anchor')
-        // window.scrollTo({ top: 0, behavior: 'instant' })
       }
     }
 
@@ -2107,9 +1915,7 @@ export default {
     onUnmounted(() => {
       const appView = document.getElementById('app')
       layout.changeViewMode('init')
-      console.log('layout on leave', layout, layout.isTOCMenuOpened.value)
       if (layout.isTOCMenuOpened.value === true) {
-        console.log('closing TOC on leave')
         layout.isTOCMenuOpened.value = false
       }
       appView.removeEventListener('scroll', updateMiradorTopPosition)

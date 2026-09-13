@@ -159,7 +159,6 @@ export default {
   setup (props) {
 
     const collConfig = computed(() => props.collectionConfig)
-    console.log('CollectionHeader collConfig', collConfig.value)
     const appConfig = computed(() => props.applicationConfig)
     const currCollection = computed(() => props.currentCollection)
 
@@ -169,7 +168,6 @@ export default {
     const isAboutOpened = ref(false)
 
     const appRootUrl = ref(`${import.meta.env.VITE_APP_APP_ROOT_URL}`)
-    console.log('HomePage setup appRootUrl', appRootUrl.value)
     const normalisedBaseUrl = (baseURL) => {
       return baseURL.replace(/\/+$/, '') + '/'
     }
@@ -201,8 +199,6 @@ export default {
 
     const getCustomHomeDescription = async () => {
       let component
-      console.log('HomePage getCustomHomeDescription collConfig.value.collectionId', collConfig.value.collectionId)
-      console.log('HomePage getCustomHomeDescription collConfig.value.aboutPageSettings', collConfig.value.homePageSettings)
       const comps = Object.fromEntries(Object.entries(import.meta.glob('confs/**/*.vue')).map(([key, value]) => {
         // remove first / if exists
         const newKey = key.replace(import.meta.env.VITE_APP_CUSTOM_SETTINGS_PATH, '').replace(/^\//, '')
@@ -214,18 +210,15 @@ export default {
 
       const match = comps[`${collConfig.value.collectionId}/${customCollectionDescription.value.compName}.vue`]
       const matchRootCollection = comps[`${rootCollectionId.value}/${customCollectionDescription.value.compName}.vue`]
-      console.log('match 1 : ', match)
-      console.log('matchRootCollection : ', matchRootCollection)
       const defaultCollection = comps['../settings/default/HomePageContent.vue']
 
       if (match) {
-        console.log('match 2 : ', match)
         component = defineAsyncComponent(() => import(`confs/${collConfig.value.collectionId}/${customCollectionDescription.value.compName}.vue`)
           .then((comp) => {
             return comp
           })
           .catch((error) => {
-            console.log(`error loading 1 confs/${collConfig.value.collectionId}/${customCollectionDescription.value.compName}.vue : `, error)
+            console.error(`error loading 1 confs/${collConfig.value.collectionId}/${customCollectionDescription.value.compName}.vue : `, error)
           })
         )
       } else if (matchRootCollection) {
@@ -234,7 +227,7 @@ export default {
             return comp
           })
           .catch((error) => {
-            console.log(`error loading 2 confs/${rootCollectionId.value}/${customCollectionDescription.value.compName}.vue : `, error)
+            console.error(`error loading 2 confs/${rootCollectionId.value}/${customCollectionDescription.value.compName}.vue : `, error)
           })
         )
       // matching About pages as default
@@ -245,11 +238,10 @@ export default {
             return comp
           })
           .catch((error) => {
-            console.log('error loading \'../settings/default/HomePageContent.vue\' : ', error)
+            console.error('error loading \'../settings/default/HomePageContent.vue\' : ', error)
           })
         )
       } else {
-        console.log('nothing')
         component = null
       }
       return component
@@ -325,7 +317,6 @@ export default {
         }
         // Local collection image
         const match = images[`${collConfig.value.collectionId}/assets/images/${collectionBanner}`]
-        console.log('HomePage getBanner match: ', match)
         if (match) {
           return {
             url: match.default,
@@ -403,8 +394,6 @@ export default {
       }
       // Not a default image : find a matching image
       else if (collectionImg && collectionImg.length > 0) {
-        console.log('HomePage getImg found : ', collectionImg)
-        console.log('HomePage getImg images: ', images)
         // External URL
         if (collectionImg.startsWith('http')) {
           return {
@@ -414,7 +403,6 @@ export default {
         }
         // Local collection image
         const match = images[`${collConfig.value.collectionId}/assets/images/${collectionImg}`]
-        console.log('HomePage getImg match: ', match)
 
         const resolved = resolveModule(match, 'collection')
         if (resolved) return resolved

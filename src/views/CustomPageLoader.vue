@@ -51,11 +51,6 @@ const component = computed(() => {
 })
 
 // 🔍 Logs pour debug
-console.log('CustomPageLoader route params:', route.params)
-console.log('CustomPageLoader config:', config.value)
-console.log('CustomPageLoader customRoutes:', config.value?.customRoutes)
-console.log('CustomPageLoader match:', customRoute.value)
-console.log('CustomPageLoader component:', component.value)
 </script>
 
 <template>

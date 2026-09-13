@@ -133,9 +133,7 @@ jsonld.documentLoader = async (url) => {
 // ─────────────────────────────────────────────────────────────────────────────
 function flattenExpanded(expanded, namespaces = {}) {
 
-  console.log('nested expanded start', expanded, namespaces)
   const node = Array.isArray(expanded) ? expanded[0] : expanded
-  console.log('nested expanded 0', expanded, node)
   if (!node) return {}
 
   // Compresse une URI absolue en préfixe:local si possible
@@ -153,7 +151,6 @@ function flattenExpanded(expanded, namespaces = {}) {
 
     const key = uri.startsWith('@') ? uri : compressUri(uri)
     const values = node[uri]
-    console.log('nested uri', uri, node, node[uri])
 
     if (uri === '@type') {
       const types = values.map(t => compressUri(t))
@@ -172,16 +169,13 @@ function flattenExpanded(expanded, namespaces = {}) {
       if ('@value' in v) return v['@value']
       if ('@id' in v && Object.keys(v).length === 1) return v['@id']
       if (typeof v === 'object' && Object.keys(v).length > 0) {
-        console.log('nested 0 v', uri, v)
         // Si c'est un objet JSON-LD structuré, récursion
         if ('@value' in v || '@id' in v || '@type' in v) {
-          console.log('nested 1 v', uri, v)
           return flattenExpanded([v], namespaces)
         }
         // Sinon objet littéral (ex: dts:download { "application/tei+xml": "url" })
-        console.log('nested 2 v', v)
         return v
-      }console.log('nested 3 v', uri, v)
+      }
       return v
     })
 
@@ -202,7 +196,6 @@ function flattenExpanded(expanded, namespaces = {}) {
 
 function resolveNested(apiResponse) {
   const result = { ...apiResponse }
-  console.log('resolved result', result)
   const dctVocab = 'http://purl.org/dc/terms/'
   const existingContext = Array.isArray(result['@context'])
     ? result['@context'] : [result['@context']].filter(Boolean)
@@ -217,13 +210,11 @@ function resolveNested(apiResponse) {
   }
 
   if (result.extensions && typeof result.extensions === 'object') {
-    console.log('resolved result.extensions', result.extensions)
     const extContext = result.extensions['@context']
     if (extContext) {
       result['@context'] = [...existingContext, extContext]
     }
     for (const [k, v] of Object.entries(result.extensions)) {
-      console.log('resolved nested key, value', k, v)
       if (k === '@context') continue
       // Ne pas écraser une clé existante (dts:title > schema:name)
       if (!(k in result)) {
@@ -238,16 +229,13 @@ function resolveNested(apiResponse) {
 
 async function expandMetadata(apiResponse, namespaces = {}) {
   try {
-    console.log('expandMetadata apiResponse', apiResponse, namespaces)
     const preprocessed = resolveNested(apiResponse)
-    console.log('expandMetadata preprocessed', preprocessed)
     /* Add download (using DTS specification results in an invalid json-ld) custom namespace ?
     preprocessed['@context'][1].download = {
       '@id': 'https://dtsapi.org/v1.0#download',
       '@type': '@json'
     }*/
     const expanded = await jsonld.expand(preprocessed)
-    console.log('expandMetadata expanded', expanded)
     const flat = flattenExpanded(expanded, namespaces)
 
     // Déduplication
@@ -294,7 +282,6 @@ function enrichValue(value, path, sourcesMap) {
     if (typeof value === 'string') {
       const cleanUrl = value.replace(/\{[^}]*\}/g, '').replace(/\?$/, '')
       const src = findSource(cleanUrl, sourcesMap)
-      console.log('imgURL enrichValue value, path', value, path, cleanUrl, src, `/${window.location.pathname.split('/').slice(2, 4).join('/')}`)
       if (!src) return value
       const isHttp = cleanUrl.startsWith('http')
       return {
@@ -311,13 +298,10 @@ function enrichValue(value, path, sourcesMap) {
     if (value && typeof value === 'object') {
       // Ajouter contentUrl comme source d'URL possible
       const url = value.url ?? value['@id'] ?? value.id ?? value['schema:contentUrl']
-      console.log('testing value', value, url, value['schema:encodingFormat'])
       // Pour les MediaObject, chercher la source sur encodingFormat plutôt que l'URL
       const formatSrc = value['schema:encodingFormat'] ? findSource(value['schema:encodingFormat'], sourcesMap) : null
-      console.log('testing formatSrc', url, formatSrc)
       const urlSrc = url ? findSource(url, sourcesMap) : null
       const src = formatSrc ?? urlSrc
-      console.log('testing src', src)
 
       // sameAs...
       const sameAsSources = []
@@ -367,7 +351,7 @@ export async function buildDisplayModel(rawMetadata, config) {
   const excludeAlways = excludeConfig.alwaysExclude ?? []
 
   const { metadata: rawJsonLd } = splitMetadata(rawMetadata)
-  console.log('buildDisplayModel rawJsonLd', rawJsonLd)
+  console.log('useMetadataProcessor.js buildDisplayModel rawJsonLd :', rawJsonLd)
 
   const metadata = await expandMetadata(rawJsonLd, namespaces)
 
@@ -464,7 +448,6 @@ export async function buildDisplayModel(rawMetadata, config) {
 
   // Phase 1 : ordered pass
   for (const term of displayOrder) {
-    console.log('buildDisplayModel Phase 1', term)
 
     if (isWildcard(term)) {
       const prefix = wildcardPrefix(term)
@@ -521,13 +504,11 @@ export async function buildDisplayModel(rawMetadata, config) {
     if (!metaKey) continue
 
     if (!(metaKey in metadata)) {
-      console.log('buildDisplayModel not found', metaKey)
       continue
     }
     const val = metadata[metaKey]
     if (val === undefined || val === null || val === '' ||
         (typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0)) {
-      console.log('buildDisplayModel deemed invalid', metaKey, metadata[metaKey])
       continue
     }
 
@@ -538,32 +519,25 @@ export async function buildDisplayModel(rawMetadata, config) {
     for (const k of candidateKeys) handledKeys.add(k)
 
   }
-  console.log('buildDisplayModel result 0', result)
 
   // Phase 2 : remaining (si onlyDeclared === false)
   if (!onlyDeclared) {
     for (const key of Object.keys(metadata)) {
-      console.log('buildDisplayModel Phase 2', key)
       if (handledKeys.has(key)) {
-        console.log('buildDisplayModel Phase 2 already processed', key)
         continue
       }
       if (isExcluded(key)) {
-        console.log('buildDisplayModel Phase 2 excluded', key)
         continue
       }
       const val = metadata[key]
       if (val === undefined || val === null || val === '' ||
           (typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0)) {
-        console.log('buildDisplayModel deemed invalid 2', key, val)
         continue
       }
       result[key] = enrichValue(val, key, sourcesMap)
-      console.log('buildDisplayModel Phase 2 enriched', key, result[key])
     }
-    console.log('buildDisplayModel Phase 2 end', metadata, result)
   }
-  console.log('buildDisplayModel result 1', result)
+  console.log('useMetadataProcessor.js buildDisplayModel result :', result)
   return result
 }
 

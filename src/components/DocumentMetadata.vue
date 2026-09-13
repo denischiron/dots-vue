@@ -203,9 +203,7 @@ export default {
       const logo = Object.entries(logos).find(([path]) =>
         path.endsWith(`/logo_${source}.svg`) || path.endsWith(`/logo_${source}.png`)
       )
-      console.log('DocumentMetadata ImgUrl source logo: ', source, Object.entries(logos))
       if (logo) {
-        console.log('DocumentMetadata ImgUrl / found svg for: ', source, logo[0])
         return logo[1]
       }
 
@@ -219,12 +217,12 @@ export default {
       () => [props.metadataProp, props.collectionConfig],
       async ([source, config]) => {
         if (!source) { metadata.value = {}; return }
-        console.log('DocumentMetadata watch metadataProp source: ', source)
+        console.log('DocumentMetadata.vue watch metadataProp source :', source)
 
         const rawSource = JSON.parse(JSON.stringify(toRaw(source)))
         const rawConfig = config ? JSON.parse(JSON.stringify(toRaw(config))) : {}
         metadata.value = await buildDisplayModel(rawSource, rawConfig)
-        console.log('DocumentMetadata watch built metadata.value: ', metadata.value)
+        console.log('DocumentMetadata.vue watch built metadata.value :', metadata.value)
       },
       { immediate: true, deep: true }
     )

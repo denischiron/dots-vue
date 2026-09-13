@@ -469,7 +469,6 @@ name: 'ResourcesList',
 
     // TEXT
     const documentCount = computed(() => {
-      //console.log('ResoucesList resultsCounts.value', resultsCounts.value)
       return isHighlights.value && bucketsCount?.value > 0
         ? (bucketsCount?.value ?? 0)
         : resultsCounts.value
@@ -561,7 +560,6 @@ name: 'ResourcesList',
       if (!parts || parts.length === 0) {
         return ['Document entier']
       }
-      //console.log('ResourcesList buildbreadcrumb hit.ancestors parts : ', hit.ancestors, parts, hit)
       return parts.filter(Boolean)
     }
 

@@ -1,10 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const rootURL = `${import.meta.env.VITE_APP_APP_ROOT_URL}`
-console.log('router const rootURL :', rootURL)
 
 const isDocProjectIdIncluded = `${import.meta.env.VITE_APP_DOCUMENT_ROUTE_INCLUDE_PROJECT_ID}`.toLowerCase() === 'true'
-console.log('router const isDocProjectIdIncluded :', isDocProjectIdIncluded)
 
 const collectionConfigs = import.meta.glob('confs/*.conf.json', { eager: true })
 
@@ -65,8 +63,6 @@ if (isDocProjectIdIncluded) {
     ],
     scrollBehavior (to, from) {
 
-      console.log('scrollBehavior to', to);
-      console.log('scrollBehavior from', from);
 
       const defaultTop = window.innerWidth < 768 ? 45 : 82;
       const toHash = to.hash.slice(1);
@@ -76,7 +72,6 @@ if (isDocProjectIdIncluded) {
       if (to.path === from.path && toHash.length) {
         // Local anchors
         const anchor = document.getElementById(toHash);
-        console.log('scrollBehavior Local anchors', to.path, to.hash, 'window.innerWidth', window.innerWidth, defaultTop, anchor);
         if (anchor) {
           // Local anchor of current loaded part of the document
           return {
@@ -113,11 +108,9 @@ if (isDocProjectIdIncluded) {
 
         const totalHeaderHeight = navTopContainerHeight + topNavBarHeight;
 
-        console.log('scrollBehavior documentArea ?', documentScroll, '>=' , navTopContainerHeight + defaultTop, navTopContainerHeight);
 
         if (documentScroll >= totalHeaderHeight) {
           // If window scroll is beyond sticky navigation bar, scroll the top of the document under the sticky menu
-            console.log('scrollBehavior documentArea1', navTopContainerHeight + defaultTop, defaultTop);
             return new Promise((resolve) => {
               if (timeout) clearTimeout(timeout);
               timeout = setTimeout(() => {
@@ -141,7 +134,6 @@ if (isDocProjectIdIncluded) {
 
 } else {
 
-  console.log('scrollBehavior else2');
   router = createRouter({
     history: createWebHistory(rootURL),
     routes: [
@@ -187,7 +179,7 @@ if (isDocProjectIdIncluded) {
 
 if (isDocProjectIdIncluded) {
   router.afterEach((to) => {
-    console.log(`Navigated to: ${to.name}, with params.collId: ${to.params.collId}, with params.id: ${to.params.id}, with query: ${to.query.refId}, with hash: ${to.hash}`)
+    console.log('router/index.js afterEach navigated route :', { name: to.name, collId: to.params.collId, id: to.params.id, refId: to.query.refId, hash: to.hash })
   })
   router.beforeEach((to, from, next) => {
     previousRoute = from
@@ -216,7 +208,7 @@ if (isDocProjectIdIncluded) {
   })
 } else {
   router.afterEach((to) => {
-    console.log(`Navigated to: ${to.name}, NO params.collId, with params.id: ${to.params.id}, with query: ${to.query.refId}, with hash: ${to.hash}`)
+    console.log('router/index.js afterEach navigated route :', { name: to.name, collId: null, id: to.params.id, refId: to.query.refId, hash: to.hash })
   })
   router.beforeEach((to, from, next) => {
     previousRoute = from

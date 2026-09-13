@@ -152,7 +152,8 @@
 </template>
 
 <script>
-import { computed, inject, isRef, onMounted, ref, watch } from 'vue'
+
+import { computed, inject, onMounted, ref, watch } from 'vue'
 
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
@@ -221,11 +222,7 @@ export default {
     const search = useSimpleSearch()
 
     const pageSize = search.pageSize
-
     const page = search.pageNum
-    watch(page, value => {
-      console.log('searchPage page = ', value)
-    })
 
     const openedFacets = search.openedFacets
 
@@ -391,7 +388,6 @@ export default {
 
       const passageTocSettings = appConfig.value?.collectionsConf?.find(c => c.collectionId === resCollId)?.tableOfContentsSettings ?? tocSettings
       const { ancestors = [], passageId } = hit
-      //console.log('searchPage debug ancestors, passageId, tocSettings?.editByCiteType', resId, hit, passageId, ancestors, passageTocSettings, resCollId)
       let refId = null
 
       // Priority: editByCiteType
@@ -409,7 +405,6 @@ export default {
             passageTocSettings.editByCiteType.includes(a.citeType.toLowerCase())
           )
           if (match) {
-            //console.log('searchPage debug matching refId by editByCiteType', passageTocSettings, match.id)
             refId = match.id
           }
         }
@@ -419,10 +414,8 @@ export default {
       if (!refId && passageTocSettings?.editByLevel) {
         const match = ancestors.find(a => a.level === passageTocSettings.editByLevel)
         if (match) {
-          //console.log('searchPage debug matching refId by editByLevel', passageTocSettings, match.id)
           refId = match.id
         } else if (ancestors.length === 0 && passageTocSettings?.editByLevel === 1) {
-          //console.log('searchPage debug matching refId by editByLevel default 1 ', passageTocSettings, passageId)
           refId = passageId
         }
       }
@@ -479,7 +472,6 @@ export default {
 
       // Grouped case (buckets)
       if (Array.isArray(result.buckets)) {
-        console.log('searchPage buckets', result.buckets)
         return result.buckets.map(bucket => ({
           ...bucket,
           identifier: bucket.resource_id || bucket.identifier || '—',
@@ -523,7 +515,6 @@ export default {
 
       return []
     })
-    console.log('SearchPage debug table data', tableData, search.result.value)
 
     const columns = computed(() => {
       const configCols =
@@ -677,7 +668,6 @@ export default {
       sort: search.sorts?.value,
       activeCollectionId: search.activeCollectionId
     }
-    console.log('searchPage initialState', initialState)
 
     const inputTerm = ref(initialState.term)
     const inputSort = ref(initialState.sort)
@@ -769,25 +759,12 @@ export default {
       inputTerm.value = ''
       executeSearches()
     }
-    console.log('searchPage inputTerm.value', inputTerm.value)
 
     search.setNoHighlight(
       !isFulltextSearch.value ||
       !inputTerm.value ||
       inputTerm.value.length === 0
     )
-
-    const noHighlight = computed(() => {
-      const projectId = store.state.search.activeProjectId
-      return store.state.search.byProject?.[projectId]?.noHighlight
-    })
-
-    const activeCollectionId = computed(() => {
-      const projectId = store.state.search.activeProjectId
-      return store.state.search.byProject?.[projectId]?.activeCollectionId
-    })
-    console.log('searchPage activeCollectionId', activeCollectionId.value)
-    console.log('searchPage noHighlight', noHighlight.value)
 
     search.setTerm(inputTerm.value)
     search.setSorts(inputSort.value)
@@ -864,8 +841,6 @@ export default {
     }
 
     onMounted(() => {
-      console.log('isRef(search.loading)', search.loading)
-      console.log('isRef(search.loading)', isRef(search.loading))
     })
 
     return {

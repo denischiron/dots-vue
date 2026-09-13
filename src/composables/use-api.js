@@ -20,7 +20,6 @@ export default function useApi () {
   const runQuery = async function (json = true, options = {}) {
     loading.value = true
     error.value = null
-    console.log('runQuery', query.value)
     try {
       const response = await fetch(query.value, { mode: 'cors', ...options })
       result.value = json ? await response.json() : await response.text()

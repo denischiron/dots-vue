@@ -135,23 +135,16 @@ export default {
       isTreeOpened: false
     })
 
-    const appRootUrl = ref(`${import.meta.env.VITE_APP_APP_ROOT_URL}`)
-    console.log('HomePage setup appRootUrl', appRootUrl.value)
     const isDocProjectIdInc = computed(() => props.isDocProjectIdIncluded)
     const dtsRootCollectionId = computed(() => props.dtsRootCollectionIdentifier)
     const rootCollectionId = computed(() => props.rootCollectionIdentifier)
     const appConfig = computed(() => props.applicationConfig)
     const collConfig = computed(() => props.collectionConfig)
+    console.log('HomePage.vue setup collConfig.value :', collConfig.value)
 
-    const customCollectionDescription = computed(() =>
-      props.collectionConfig?.homePageSettings?.descriptionSection?.customCollectionDescription)
-    console.log('HomePage setup customCollectionDescription', customCollectionDescription.value)
-    const collectionAltTitle = computed(() => props.collectionConfig.homePageSettings?.pageHeader?.collectionAltTitle)
-    console.log('HomePage setup collectionAltTitle', collectionAltTitle.value)
     const isAboutOpened = ref(false)
 
     const collectionId = computed(() => props.collectionIdentifier)
-    console.log('HomePage setup collectionId', collectionId.value)
 
     const componentTOC = ref([])
     const currCollection = computed(() => props.currentCollection)
@@ -184,32 +177,25 @@ export default {
       })
     }
 
-    console.log('HomePage set currentCollection.value / componentTOC.value (not yet set) : ', currCollection.value, componentTOC.value)
 
     const displayOpt = ref(props.collectionConfig?.homePageSettings?.listSection?.displayMode)
-    console.log('HomePage set displayOpt :', displayOpt.value)
 
     const expandedById = ref([])
 
     const toggleExpanded = async (collId) => {
-      console.log('HomePage toggleExpanded currCollection.value, collId, componentTOC.value expandedById.value', currCollection.value, collId, componentTOC.value, expandedById.value)
       if (componentTOC.value.length === 0) {
-        console.log('HomePage toggleExpanded triggered')
         const response = await getMetadataFromApi(collId, null, null)
         response.member.forEach(m => getSimpleObject(m, collId, currCollection.value?.projectIdentifier))
 
         // optional rest all resources to toc ?
         // if (response.member.every(el => el.citeType === 'Resource')) {
         //   displayOpt.value = 'toc'
-        //   console.log('HomePage toggleExpanded need to update displayOpt !!!!!!!!!!!')
         // }
         componentTOC.value = response.member
 
-        console.log('HomePage toggleExpanded updated componentTOC.value', componentTOC.value, response)
       }
       expandedById.value[collId] = !expandedById.value[collId]
       //state.isTreeOpened = !state.isTreeOpened
-      console.log('HomePage toggleExpanded after expandedById[collectionId] : ', collId, expandedById.value)
 
     }
 
@@ -221,7 +207,6 @@ export default {
       () => collConfig.value?.homePageSettings?.listSection?.openState,
       async (openState) => {
         if (openState && !state.isTreeOpened) {
-          console.log('HomePage collConfig reopening ???')
           await toggleExpanded(currCollection.value.identifier)
         }
       },
@@ -268,9 +253,7 @@ export default {
     // optional rest all resources to toc ?
     // if (componentTOC.value.every(el => el.citeType === 'Resource')) {
     //   displayOpt.value = 'toc'
-    //   console.log('HomePage toggleExpanded need to update displayOpt !!!!!!!!!!!')
     // }
-    console.log('HomePage watch props.currentCollection, rebuild componentTOC.value', componentTOC.value)
   },
   { deep: true, immediate: true }
 )
@@ -282,7 +265,6 @@ export default {
     const resultCount = ref(0)
 
     const listOfResources = async (items, runId) => {
-      //console.log('HomePage listOfResources items', items)
       if (!Array.isArray(items)) return []
       const result = []
 
@@ -293,7 +275,6 @@ export default {
 
         // if RESOURCE → push to results
         if (type === 'Resource') {
-          console.log('HomePage listOfResources pushing resource items', item)
 
           result.push(item)
           resultCount.value += 1
@@ -304,7 +285,6 @@ export default {
         if (type === 'Collection') {
           const collId = item.identifier || item['@id']
           const projectId = item.projectIdentifier
-          console.log('HomePage listOfResources getting childs of collId', item)
 
           try {
             const response = await getMetadataFromApi(collId, null, null)
@@ -316,7 +296,6 @@ export default {
               projectIdentifier: m.projectIdentifier ?? projectId
             }))
 
-            console.log('HomePage listOfResources members', members)
 
             // recursive descendants loop
             const children = await listOfResources(members, runId)
@@ -329,7 +308,6 @@ export default {
           }
         }
       }
-      //console.log('HomePage listOfResources result', result)
       return result
     }
 

@@ -163,20 +163,16 @@ export default {
 
     document.documentElement.setAttribute('data-theme', whichTheme.value)
     // localStorage.setItem('theme', whichTheme.value)
-    console.log('App.vue setup theme : ', whichTheme.value)
 
     useCustomCss(customCss)
 
     const setDtsRootResponse = async (route) => {
-      console.log('App.vue setDtsRootResponse source', route)
       const dtsRootResponse = await getMetadataFromApi(null, null, route)
       dtsRootCollectionId.value = dtsRootResponse.identifier
-      console.log('App.vue get dtsRootCollectionId', dtsRootCollectionId.value)
     }
 
     const getBreadcrumb = async () => {
       const ancestors = await getAncestors(currCollection.value)
-      console.log('ancestors', ancestors)
       breadCrumb.value = ancestors.map((collections) => {
         const collection = collections[0]
         const collConfig = appConfig.value.collectionsConf.find((config) => { return config.collectionId === collection.identifier })
@@ -220,14 +216,10 @@ export default {
     }
 
     const setCurrentCollectionContext = async (route) => {
-      //console.log('App.vue setCurrentCollectionContext origin route', origin, route)
-      console.log('this is where it fails')
       await mergeSettings(appConfig)
-      console.log('this is where it fails 2')
       let metadataResponse = {}
       let defaultConf = appConfig.value.genericConf
       const matchedCollectionConf = appConfig.value.collectionsConf && appConfig.value.collectionsConf.filter(coll => coll.collectionId === collectionId.value).length > 0 ? appConfig.value.collectionsConf.find(coll => coll.collectionId === collectionId.value) : defaultConf
-      console.log('App.vue setCurrentCollectionContext setUpCollectionId matchedCollectionConf', collectionId.value, matchedCollectionConf)
       try {
         if (rootCollectionIdentifier.value === dtsRootCollectionId.value && rootCollectionIdentifier.value === collectionId.value) {
           metadataResponse = await fetchMetadata('app.vue setCurrentCollectionContext fetchMetadata (no id)', null, 'Collection', matchedCollectionConf, route)
@@ -248,8 +240,6 @@ export default {
         metadataResponse = emptyMetadata(collectionId.value)
       }
 
-      console.log('App.vue setCurrentCollectionContext collectionId.value ', collectionId.value)
-      console.log('App.vue setCurrentCollectionContext metadataResponse', metadataResponse)
 
 
       if (matchedCollectionConf && matchedCollectionConf.excludeCollectionIds && matchedCollectionConf.excludeCollectionIds.length > 0) {
@@ -260,16 +250,13 @@ export default {
         metadataResponse.displayMode = matchedCollectionConf?.homePageSettings?.listSection?.displayMode
       }
 
-      console.log('App.vue metadataResponse 1', metadataResponse)
 
       metadataResponse.member.forEach(m => { m.parent = collectionId.value })
       metadataResponse.children.forEach(m => { m.parent = collectionId.value })
       if (metadataResponse.projectIdentifier) {
-        console.log('App.vue metadataResponse 1b', metadataResponse.projectIdentifier)
         metadataResponse.member.forEach(m => { m.projectIdentifier = metadataResponse.projectIdentifier })
         metadataResponse.children.forEach(m => { m.projectIdentifier = metadataResponse.projectIdentifier })
       }
-      console.log('App.vue metadataResponse 2', metadataResponse)
 
       metadataResponse.member.forEach(m => {
         let childMatchedCollectionConf = appConfig.value.collectionsConf.find(c => c.collectionId === m.identifier)
@@ -283,13 +270,11 @@ export default {
           m.displayMode = childMatchedCollectionConf?.homePageSettings?.listSection?.displayMode
         }
       })
-      console.log('App.vue metadataResponse 3', metadataResponse)
 
       currCollection.value = metadataResponse
 
       // Get and set the collection project (only if current collection is not top collection)
       if (collectionId.value !== rootCollectionIdentifier.value) {
-        console.log('App.vue setCurrentCollectionContext get project', collectionId.value, rootCollectionIdentifier.value)
         projectCollId.value = await getProjectFromApi(collectionId.value)
         store.commit('setProjectId', projectCollId.value)
         await getBreadcrumb(collectionId.value)
@@ -298,7 +283,6 @@ export default {
         store.commit('setProjectId', rootCollectionIdentifier.value)
         breadCrumb.value = []
       }
-      console.log('App.vue setCurrentCollectionContext projectCollId.value : ', projectCollId.value)
     }
 
     const getCustomCss = async () => {
@@ -307,13 +291,8 @@ export default {
           const newKey = key.split('/').at(-1).replace('.customCss.css', '')
           return [newKey, value]
         }))
-        console.log('App.vue getCustomCss appCssConfs ', appCssConfs)
-        console.log('App.vue getCustomCss collConfig.value.collectionCustomCss', collConfig.value.collectionCustomCss)
-        console.log('App.vue getCustomCss get in if')
-        console.log('App.vue getCustomCss path', `${import.meta.env.VITE_APP_CUSTOM_SETTINGS_PATH}/${collConfig.value.collectionCustomCss}/assets/css/${collConfig.value.collectionCustomCss}.customCss.css`)
 
         if (collConfig.value.collectionCustomCss && appCssConfs[collConfig.value.collectionCustomCss]) {
-          console.log('App.vue getCustomCss from collection and customCss exists : ', collConfig.value.collectionCustomCss, appCssConfs[collConfig.value.collectionCustomCss])
           customCss.value = (await appCssConfs[collConfig.value.collectionCustomCss]()).default
 
           // check if a customCss style tag exists, if not create it
@@ -330,14 +309,9 @@ export default {
       } else removeCustomCss()
     }
     const removeCustomCss = () => {
-      console.log('App.vue removeCustomCss store.state.collectionId', store.state.collectionId)
       const styleTags = [...document.querySelectorAll('style')]
-      console.log('App.vue removeCustomCss styleTags ', styleTags)
       styleTags.forEach((tag) => {
-        // console.log('App.vue watch store.state.collectionId getCustomCss tag.textContent ', tag.textContent)
         if (tag.id === 'customCss') {
-          console.log('App.vue removeCustomCss tag.textContent ', tag.textContent)
-          console.log('App.vue removeCustomCss tag.id ', tag.id)
           customCss.value = undefined
           tag.remove()
         }
@@ -347,7 +321,6 @@ export default {
     watch(
       () => store.state.collectionId,
       async (collectionIdFromStore) => {
-        console.log('watch store.state.collectionId 1 :', collectionIdFromStore, isInitializing.value, !collectionIdFromStore, !dtsRootCollectionId.value || !rootCollectionIdentifier.value)
 
         // Safeguards
         if (!collectionIdFromStore) return
@@ -358,7 +331,6 @@ export default {
           return
         }
 
-        console.log('watch store.state.collectionId 2 :', collectionIdFromStore)
 
         collConfigReady.value = false
 
@@ -525,9 +497,8 @@ export default {
     watch(
       () => [route.name, route.params, route.query],
       async (newVal, oldVal) => {
-        const [newName, newParams, newQuery] = newVal
-        const [oldName, oldParams, oldQuery] = oldVal || []
-        console.log('App.vue watch ROUTER oldRoute/newRoute : ', { name: oldName, params: oldParams, query: oldQuery }, { name: newName, params: newParams, query: newQuery })
+        const [newName, newParams] = newVal
+        const [oldName, oldParams] = oldVal || []
 
         isInitializing.value = true
         try {
@@ -536,7 +507,6 @@ export default {
             return
           }
           if (!oldVal) {
-            console.log('First run / HMR: skip compare logic, reset store collectionId (force config setup)')
             store.commit('setCollectionId', null)
           }
           // Same collection
@@ -545,7 +515,6 @@ export default {
             newParams?.collId === oldParams?.collId &&
             newParams?.id === oldParams?.id
           ) {
-            console.log('App.vue watch ROUTER same collection or same document do nothing')
             return
           }
 

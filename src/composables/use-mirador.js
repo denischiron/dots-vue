@@ -54,7 +54,6 @@ export default function useMirador(container) {
   }
 
   function initialize() {
-    console.log('mirador initialize', performance.now())
 
     if (!container.value) {
       console.warn('mirador initialize: no container')
@@ -155,7 +154,6 @@ export default function useMirador(container) {
     const homeButton = container.value?.querySelector(
       'button[aria-label="Reset zoom"]'
     )
-    console.log('use-mirador resetView button', container.value, homeButton)
     if (homeButton) {
       homeButton.click()
     } else {
@@ -164,10 +162,6 @@ export default function useMirador(container) {
   }
 
   function loadCollectionManifest(collectionObject) {
-    console.log(
-      'use-mirador loadCollectionManifest',
-      collectionObject?.id
-    )
 
     if (!instance.miradorStore) {
       console.warn(
@@ -186,14 +180,6 @@ export default function useMirador(container) {
 
     const stateBefore = instance.miradorStore.getState()
 
-    console.log(
-      'mirador state before windows',
-      stateBefore.windows
-    )
-    console.log(
-      'mirador state before manifests',
-      stateBefore.manifests
-    )
 
     if (stateBefore.windows[_windowId]) {
       dispatchAction(Mirador.actions.removeWindow(_windowId))
@@ -209,22 +195,11 @@ export default function useMirador(container) {
       })
     )
 
-    const stateAfter = instance.miradorStore.getState()
 
-    console.log(
-      'use-mirador state after manifests detail',
-      JSON.stringify(stateAfter.manifests?.[collectionObject.id])
-    )
-
-    console.log(
-      'use-mirador state after windows detail',
-      JSON.stringify(stateAfter.windows?.[_windowId])
-    )
     resetView()
   }
 
   function loadManifest(manifestObject, canvasId) {
-    console.log('use-mirador loadManifest', manifestObject?.id, canvasId)
 
     if (!instance.miradorStore) {
       console.warn('use-mirador loadManifest: store not initialized')
@@ -238,14 +213,6 @@ export default function useMirador(container) {
 
     const stateBefore = instance.miradorStore.getState()
 
-    console.log(
-      'mirador state before windows',
-      stateBefore.windows
-    )
-    console.log(
-      'mirador state before manifests',
-      stateBefore.manifests
-    )
 
     if (stateBefore.windows[_windowId]) {
       dispatchAction(Mirador.actions.removeWindow(_windowId))
@@ -261,29 +228,17 @@ export default function useMirador(container) {
       })
     )
 
-    const stateAfter = instance.miradorStore.getState()
 
-    console.log(
-      'use-mirador state after manifests detail',
-      JSON.stringify(stateAfter.manifests?.[manifestObject.id])
-    )
-
-    console.log(
-      'use-mirador state after windows detail',
-      JSON.stringify(stateAfter.windows?.[_windowId])
-    )
     resetView()
   }
 
   function dispatchAction(action) {
     if (instance.miradorStore) {
       instance.miradorStore.dispatch(action)
-      console.log('use-mirador mirador dispatchAction action', action)
     }
   }
 
   function setCanvasId(canvasId) {
-    console.log('use-mirador setCanvasId', canvasId)
     dispatchAction(Mirador.actions.setCanvas(_windowId, canvasId))
     resetView()
   }
@@ -294,7 +249,6 @@ export default function useMirador(container) {
       unsubscribeErrors = null
     }
     if (instance.reactRoot) {
-      console.log('use-mirador unmount in onUnmounted')
       instance.reactRoot.unmount()
       instance.reactRoot = null
     }

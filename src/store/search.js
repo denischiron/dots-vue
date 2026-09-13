@@ -5,8 +5,6 @@ const PAGE_SIZE = Math.min(
 )
 
 function createEmptySearchState() {
-  console.trace('searchPage createEmptySearchState')
-  console.log('searchPage SEARCH MODULE INSTANCE ID', Math.random())
 
   return {
     loading: false,
@@ -221,13 +219,11 @@ export default {
 
     setCollectionFacet(state, v) {
       const s = getProject(state)
-      console.log('searchPage setCollectionFacet before', s.facets )
 
       if (!s) return
 
       s.facets = v
       invalidatePagination(s)
-      console.log('searchPage setCollectionFacet after', s.facets )
     },
 
     setSearchFilter(state, { key, value }) {

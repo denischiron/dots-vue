@@ -41,7 +41,6 @@ export default function useLayout () {
 
   const changeViewMode = function (v) {
     //viewMode.value = v
-    console.log('changeViewMode before : ', viewMode.value, v)
     const isMobile = window.innerWidth < 768;
     if (v === 'init') {
       viewMode.value = 'text-mode'
@@ -64,7 +63,6 @@ export default function useLayout () {
       isTOCMenuOpened.value = false
     }
 
-    console.log('changeViewMode after : ', viewMode.value)
   }
 
   const getViewMode = function () {

@@ -177,16 +177,6 @@ watch(
   }
 )
 
-watch(
-  () => props.ranges,value => {
-    console.log('TEMPORAL SLIDER ranges changed', JSON.stringify(value))
-  },
-  {
-    immediate:true,
-    deep:true
-  }
-)
-
 // --------------------------
 // Inputs -> slider
 // --------------------------
@@ -360,7 +350,6 @@ function customProcess() {
       }
     ])
   }
-  //console.log('customprocess debug', currentFacet.value, percent(intersectionStart), percent(intersectionEnd))
   return processes
 }
 
@@ -416,7 +405,6 @@ watch(
   currentFacet,
   facet => {
     if (!facet) {
-      console.log('[TemporalSlider] currentFacet: null')
       return
     }
 

@@ -86,12 +86,7 @@ export default {
     const route = useRoute()
     const expandedById = ref({})
     const maxCiteDepth = ref(props.maxcitedepth)
-    console.log('TOC setup maxCiteDepth.value ', maxCiteDepth.value)
     const componentTOC = ref(props.toc.filter(i => i.level <= maxCiteDepth.value))
-    console.log('TOC setup componentTOC.value & length', componentTOC.value, componentTOC.value.length)
-    // console.log('TOC setup props.toc :', props.toc)
-    // console.log("TOC props.maxcitedepth :", props.maxcitedepth)
-    // console.log("TOC props.refid :", props.refid)
 
     componentTOC.value.filter(i => i.parent === route.params.id).forEach((item) => {
       if (item.parent === route.params.id) {
@@ -105,7 +100,6 @@ export default {
       }
     })
     if (store.state.arianeDocument && store.state.arianeDocument.length > 0) {
-      console.log('TOC setup store.state.arianeDocument', store.state.arianeDocument)
       store.state.arianeDocument.forEach(item => {
         componentTOC.value.filter(i => i.identifier === item).forEach((n) => {
           n.show = true
@@ -124,11 +118,8 @@ export default {
         }
       })
     }
-    console.log('TOC componentTOC.value', store.state.arianeDocument, componentTOC.value)
-    console.log('TOC setup expandedById.value :', expandedById.value)
 
     const toggleExpanded = (id) => {
-      console.log('TOC toggleExpanded id, expandedById.value, expandedById.value[id] : ', id, expandedById.value, expandedById.value[id])
       function hideDescendants (ident) {
         const node = componentTOC.value.find(item => item.identifier === ident)
         node.show = false
@@ -137,7 +128,6 @@ export default {
         } else {
           node['expanded'] = false
         }
-        console.log('TOC toggleExpanded id hideDescendants node ident ', node, ident)
         if (node.children && node.children.length > 0 && node.level < maxCiteDepth.value) {
           for (let i = 0; i < node.children.length; i += 1) {
             if (expandedById.value[node.identifier]) {
@@ -150,7 +140,6 @@ export default {
         }
       }
       expandedById.value[id] = !expandedById.value[id]
-      console.log('TOC toggleExpanded id updated : ', id, expandedById.value)
       componentTOC.value.find(n => n.identifier === id).expanded = expandedById.value[id]
       componentTOC.value.filter(n => n.parent === id).forEach((item) => {
         if (expandedById.value[id]) {
@@ -161,12 +150,10 @@ export default {
           hideDescendants(item.identifier)
         }
       })
-      console.log('TOC after expandedById[id] : ', id, expandedById.value)
     }
 
     const goTo = function (item) {
       // currentRefId.value = ref
-      // console.log("TOC ref : ", $event, currentRefId.value)
       function hideDescendants (ident) {
         const node = componentTOC.value.find(item => item.identifier === ident)
         node.show = false
@@ -175,7 +162,6 @@ export default {
         } else {
           node['expanded'] = false
         }
-        console.log('TOC goTo id hideDescendants node ident ', node, ident)
         if (node.children && node.children.length > 0 && node.level < maxCiteDepth.value) {
           for (let i = 0; i < node.children.length; i += 1) {
             if (expandedById.value[node.identifier]) {
@@ -185,7 +171,6 @@ export default {
         }
       }
       if (item.ancestor_editorialLevel) {
-        console.log('TOC goTo / item / item.ancestor_editorialLevel ', item, expandedById.value)
         componentTOC.value.filter(node => node.ancestor_editorialLevel && (node.ancestor_editorialLevel !== item.ancestor_editorialLevel)).forEach((n) => {
           if (expandedById.value[n.identifier]) {
             expandedById.value[n.identifier] = false
@@ -237,7 +222,6 @@ export default {
             router.push({ name: 'Document', params: { collId: route.params.collId, id: item.router_params }, hash: item.router_hash })
           }
         } else if (item.router_refid) {
-          console.log('TOC goto item.router_refid: ', item.router_refid)
           router.push({ name: 'Document', params: { collId: route.params.collId, id: item.router_params }, query: { refId: item.router_refid } })
         } else {
           router.push({ name: 'Document', params: { collId: route.params.collId, id: item.router_params } })
@@ -250,7 +234,6 @@ export default {
             router.push({ name: 'Document', params: { id: item.router_params }, hash: item.router_hash })
           }
         } else if (item.router_refid) {
-          console.log('TOC goto item.router_refid: ', item.router_refid)
           router.push({ name: 'Document', params: { id: item.router_params }, query: { refId: item.router_refid } })
         } else {
           router.push({ name: 'Document', params: { id: item.router_params } })
@@ -359,12 +342,10 @@ export default {
     })
 
     watch(expandedById, () => {
-      console.log('TOC watch expandedById', expandedById.value)
       function hideDescendants (id) {
         const node = componentTOC.value.filter(item => item.identifier === id)
         node.show = false
         node.expanded = false
-        console.log('TOC watch hideDescendants (id) node', node)
         if (node.children && node.children.length > 0) {
           for (let i = 0; i < node.children.length; i += 1) {
             if (expandedById.value[node.identifier]) {
@@ -375,7 +356,6 @@ export default {
       }
       Object.keys(expandedById.value).forEach((item) => {
         componentTOC.value.filter(n => n.parent === item).forEach((child) => {
-          console.log('TOC watch item', item, expandedById.value, expandedById.value[item])
           if (expandedById.value[item]) {
             child.show = true
           } else {

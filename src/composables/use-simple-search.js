@@ -157,13 +157,6 @@ export default function useSimpleSearch() {
       s.collectionId || s.activeCollectionId
         ? `&collectionId=${s.collectionId || s.activeCollectionId}`
         : ''
-    console.log('searchPage before api.setQuery',{
-      term: s.term,
-      's.activeCollectionId': s.activeCollectionId,
-      's.collectionId': s.collectionId,
-      isResourceSearch: isResourceSearch.value,
-      termValue
-    })
 
     // SEARCH FILTERS
     let filterArgs = ''
@@ -228,16 +221,10 @@ export default function useSimpleSearch() {
         }`
     }
 
-    api.setQuery(
-      `${_baseApiURL}/search?query=${encodeURIComponent(termValue)}&${filterArgs}&page[number]=${s.pageNum}&page[size]=${s.pageSize}${sortArg}${highlightArg}${groupbyArg}${collectionArg}${facetArgs}${rangesArg}${temporalArg}${excludeFacetsArg}${afterArg}`
-    )
-    console.log('searchPage api.setQuery',{
-      term: s.term,
-      activeCollectionId: s.activeCollectionId,
-      isResourceSearch: isResourceSearch.value,
-      termValue
-    })
-    console.log('searchPage final query', `${_baseApiURL}/search?query=${encodeURIComponent(termValue)}&${filterArgs}&page[number]=${s.pageNum}&page[size]=${s.pageSize}${sortArg}${highlightArg}${groupbyArg}${collectionArg}${facetArgs}${rangesArg}${temporalArg}${excludeFacetsArg}${afterArg}`)
+    const searchUrl = `${_baseApiURL}/search?query=${encodeURIComponent(termValue)}&${filterArgs}&page[number]=${s.pageNum}&page[size]=${s.pageSize}${sortArg}${highlightArg}${groupbyArg}${collectionArg}${facetArgs}${rangesArg}${temporalArg}${excludeFacetsArg}${afterArg}`
+
+    api.setQuery(searchUrl)
+    console.log('use-simple-search.js updateQuery searchUrl :', searchUrl)
   }
 
   watch(
@@ -274,7 +261,6 @@ export default function useSimpleSearch() {
       await api.runQuery()
 
       const _res = api.result.value
-      console.log('searchPage API result:', _res)
 
       if (!_res) return
 
@@ -283,7 +269,6 @@ export default function useSimpleSearch() {
       // -----------------------------
 
       const hasBuckets = Array.isArray(_res.buckets)
-      console.log('searchPage hasBuckets ', hasBuckets)
 
       let res = {}
 
@@ -315,7 +300,6 @@ export default function useSimpleSearch() {
         }
       }
 
-      console.log('searchPage result res: ', res)
 
       store.commit('search/setSearchResult', res)
 

@@ -577,31 +577,24 @@ export default {
         : { [currCollection.value.identifier]: true }
     )
 
-    console.log('CollectionTOC setup vars: ', displayOpt.value, collConfig.value?.collectionId, collConfig.value?.homePageSettings?.listSection?.openState, lvl.value)
 
     const selectedParent = ref(props.currentCollection ? props.currentCollection.identifier : '')
 
     const toggleExpanded = async (coll) => {
-      console.log('CollectionTOC toggleExpanded componentTOC collId source: ', componentTOC.value, coll)
       const collId = coll.identifier || coll['@id']
       const projectId = coll.projectIdentifier
 
       const idx = componentTOC.value.findIndex(item => item['@id'] === collId || item.identifier === collId)
-      console.log('CollectionTOC toggleExpanded idx', idx)
       if (idx !== -1) {
         const item = componentTOC.value[idx]
 
         if (!item.children || item.children.length === 0) {
           let response = await getMetadataFromApi(collId, null, null)
-          console.log('CollectionTOC toggleExpanded response', response)
 
           response?.member?.forEach(m => getSimpleObject(m, collId, projectId))
-          console.log('CollectionTOC toggleExpanded response after identifier', componentTOC.value, response)
 
           if ((!coll?.parent?.length && displayOpt.value === 'mixed' && displayMode.value !== 'toc') || displayOpt.value === 'mixed' && displayMode.value === 'toc') {
-            console.log('CollectionTOC toggleExpanded mark deeper levels mixed child members as toc', displayOpt.value, displayMode.value)
             response.member.forEach(c => c.forcedDisplayOpt = 'toc')
-            console.log('CollectionTOC toggleExpanded mark deeper levels mixed child members as toc updated : ', response.member)
           }
 
           // Reassigning to ensure Vue reactivity
@@ -613,25 +606,20 @@ export default {
           componentTOC.value[idx].member = response.member
           componentTOC.value[idx].children = response.member
 
-          console.log('CollectionTOC toggleExpanded componentTOC', componentTOC.value)
         }
       }
       selectedParent.value = collId
-      //console.log('CollectionTOC after selectedParent.value : ',  selectedParent.value)
       expandedById.value[collId] = !expandedById.value[collId]
-      console.log('CollectionTOC toggleExpanded after expandedById[collectionId] : ', collId, expandedById.value, componentTOC.value)
     }
 
 
     const openInitialCollections = async () => {
-      console.log('CollectionTOC openInitialCollections componentTOC.value', componentTOC.value)
       const collections = componentTOC.value.filter(
           item => item.citeType === 'Collection' || item['@type'] === 'Collection'
       )
 
       for (const comp of collections) {
         const conf = appConfig.value.collectionsConf.find(c => c.collectionId === comp.identifier)
-        console.log('CollectionTOC openInitialCollections conf', conf)
 
         if (displayOpt.value === 'toc') {
           // Lower levels of Cards are unavailable by design and Lists are not hierarchy objects
@@ -642,7 +630,6 @@ export default {
           }
         } else if (displayOpt.value === 'mixed' && displayMode.value === 'mixed') {
           // Lower levels of Mixed mode are opened by default
-          console.log('CollectionTOC openInitialCollections opening mixed first lower level (after first level displayMode is "toc"', comp, lvl.value)
           await toggleExpanded(comp)
           // wait next render
           await nextTick()
@@ -652,7 +639,6 @@ export default {
 
 
 
-    console.log('CollectionTOC setup componentTOC', currCollection.value.identifier, componentTOC.value, currCollection.value, expandedById, lvl)
 
     // DISPLAY OPTIONS
 
@@ -769,7 +755,6 @@ export default {
 
     // CARDS (incl. CARDS OF MIXED DISPLAY MODE) LINK MANAGEMENT
     const canNavigate = (item) => {
-      //console.log('canNavigate isDocProjectIdInc.value item.parent rootCollectionId.value item.identifier item.projectIdentifier ', isDocProjectIdInc.value, item.parent, rootCollectionId.value, item.identifier, item.projectIdentifier)
       return isDocProjectIdInc.value && (item.parent === rootCollectionId.value || item.identifier === item.projectIdentifier)
     }
 
@@ -923,15 +908,12 @@ export default {
 
         async (newVal) => {
         if (route.name !== 'Document') return
-        console.log('CollectionTOC watch collectionBreadcrumb.value newVal', newVal)
 
         const ancestors = await getAncestors(newVal)
-        console.log('CollectionTOC watch collectionBreadcrumb.value ancestors', ancestors)
         collectionBreadcrumb.value = (ancestors || [])
           .flat()
           .filter(anc => anc['@type'] === 'Collection')
           .map(col => col['@id'])
-        console.log('CollectionTOC watch collectionBreadcrumb.value', collectionBreadcrumb.value)
         const items = componentTOC.value
             .filter(it =>
               it['@type'] === 'Collection' &&
@@ -952,19 +934,14 @@ export default {
   () => [currCollection.value],
   async () => {
         if (displayOpt.value === 'toc' && lvl.value === 1 && props.collectionConfig?.homePageSettings?.listSection?.openState) {
-          console.log('CollectionTOC watch opening first level based on openState : ', props.collectionConfig?.homePageSettings?.listSection?.openState)
           await openInitialCollections()
         } else if ((displayOpt.value === 'mixed') && lvl.value < 2) {
-          console.log('CollectionTOC watch opening up to 2nd level :', displayOpt.value, displayMode.value, lvl.value)
           await openInitialCollections()
         }
 
         if ((!currCollection.value?.parent?.length && displayOpt.value === 'mixed' && displayOpt.value !== 'toc')) {
-          console.log('CollectionTOC watch mark deeper levels mixed child members as toc', displayOpt.value, displayOpt.value)
           componentTOC.value.forEach(c => c.forcedDisplayOpt = 'toc')
-          console.log('CollectionTOC watch mark deeper levels mixed child members as toc, updated : ', componentTOC.value)
         }
-        console.log('CollectionTOC watch rootCollectionId.value === currCollection.value.parent', rootCollectionId.value, currCollection.value.parent)
       },{ immediate: true }
     )
 
@@ -984,9 +961,7 @@ export default {
 
         componentTOC.value.splice(0, componentTOC.value.length, ...result)
         if ((!currCollection.value?.parent?.length && displayOpt.value === 'mixed' && displayMode.value !== 'toc') || displayOpt.value === 'mixed' && displayMode.value === 'toc') {
-          console.log('CollectionTOC watch mark deeper levels mixed child members as toc')
           componentTOC.value.forEach(c => c.forcedDisplayOpt = 'toc')
-          console.log('CollectionTOC watch mark deeper levels mixed child members as toc updated : ', componentTOC.value)
         }
       },
       { immediate: true }

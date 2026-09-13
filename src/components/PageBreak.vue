@@ -35,9 +35,7 @@ export default {
         const imageThumbnailY = imageThumbnail.getBoundingClientRect().top;
         const textScrollBefore = window.scrollY;
 
-        console.log(props.canvasId)
         const currentCanvasId = Object.values(mirador.miradorStore.getState().windows)[0].canvasId
-        console.log('currentCanvasId / props.canvasId', currentCanvasId, props.canvasId, currentCanvasId.substring(currentCanvasId.lastIndexOf('/f') + 1, currentCanvasId.length))
         if (currentCanvasId === props.canvasId && layout.getViewMode() !== 'text-mode') {
           layout.changeViewMode('init')
           mirador.setCanvasId(props.canvasId.substring(0, props.canvasId.lastIndexOf('/f') + 1) + 'f1')
