@@ -13,7 +13,6 @@ export const ViteAppConfig = z
       { error: (issue) => issue.input === undefined ? 'Missing key': 'Invalid, must be "true" or "false"' }
     ),
     VITE_APP_CUSTOM_SETTINGS_PATH: z.string().optional(),
-    VITE_APP_THEME: z.string().optional(),
     VITE_APP_ELASTICSEARCH_URL: z.string().optional(),
     VITE_APP_SEARCH_RESULT_PER_PAGE: z.string().optional()
   })

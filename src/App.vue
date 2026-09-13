@@ -117,7 +117,6 @@ export default {
     const appError = ref(null)
 
     const currCollection = ref({})
-    const whichTheme = ref(`${import.meta.env.VITE_APP_THEME}`.length === 0 ? 'red' : `${import.meta.env.VITE_APP_THEME}`)
     const customCss = ref({})
     const scrollTopIsVisible = ref(false)
     const scrollTopOpacity = ref(0)
@@ -160,9 +159,6 @@ export default {
     const breadCrumb = ref([])
     const isDocProjectIdInc = `${import.meta.env.VITE_APP_DOCUMENT_ROUTE_INCLUDE_PROJECT_ID}`.toLowerCase() === 'true'
     // getting and formatting collection details
-
-    document.documentElement.setAttribute('data-theme', whichTheme.value)
-    // localStorage.setItem('theme', whichTheme.value)
 
     useCustomCss(customCss)
 
