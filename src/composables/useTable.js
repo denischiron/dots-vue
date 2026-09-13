@@ -1,5 +1,26 @@
 import { ref, computed, watch } from 'vue'
 
+// A date column holds EDTF-like values: a year (`1904`), a range (`827/1216`),
+// an approximation (`0975~/1280`), an interval (`1966-1998`). Only groups of
+// three or four digits are read as years, so an ISO date keeps its year and
+// drops its month and day.
+const YEAR_PATTERN = /\d{3,4}/g
+
+export const yearBounds = (value) => {
+  if (value == null) return undefined
+  if (typeof value === 'number') return { start: value, end: value }
+
+  const text = String(value).trim()
+  const years = text.match(YEAR_PATTERN)?.map(Number)
+  if (!years?.length) return undefined
+
+  // An inner hyphen separates two years (`1966-1998`) and must not turn one
+  // negative; only a leading one marks a year before the common era.
+  if (text.startsWith('-')) years[0] = -years[0]
+
+  return { start: Math.min(...years), end: Math.max(...years) }
+}
+
 // Walks a dotted path through an object. Each segment falls back to a
 // case-insensitive match, which is what lets a configuration written in
 // the DTS casing (`dublinCore.created`) resolve against a payload that
@@ -128,14 +149,34 @@ export function useTable(dataSource, columns, options = {}) {
     })
   }
 
+  // Date columns are compared on their year bounds, never as strings: the
+  // index already carries them, and they are parsed from the value otherwise.
+  // Same convention as the arrays above, asc on the earliest year, desc on
+  // the latest.
+  const getDateSortValue = (obj, path) => {
+    const [namespace, field] = path.split('.')
+    const bound = sort.value.direction === 'desc' ? 'end' : 'start'
+
+    if (namespace && field) {
+      const indexed = walkPath(obj, `temporal.${namespace}.${field}_${bound}`)
+      if (typeof indexed === 'number') return indexed
+    }
+
+    const bounds = yearBounds(getSortValue(obj, path))
+    return bounds ? bounds[bound] : undefined
+  }
+
   const sorted = computed(() => {
     if (!sort.value.key || sort.value.direction === 'none') {
       return filtered.value
     }
 
+    const column = (columns.value || []).find(col => col.key === sort.value.key)
+    const isDate = column?.type === 'date'
+
     return [...filtered.value].sort((a, b) => {
-      const aVal = getSortValue(a, sort.value.key)
-      const bVal = getSortValue(b, sort.value.key)
+      const aVal = isDate ? getDateSortValue(a, sort.value.key) : getSortValue(a, sort.value.key)
+      const bVal = isDate ? getDateSortValue(b, sort.value.key) : getSortValue(b, sort.value.key)
 
       if (aVal == null) return 1
       if (bVal == null) return -1
