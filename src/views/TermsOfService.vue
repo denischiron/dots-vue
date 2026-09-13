@@ -68,27 +68,6 @@
         </p>
 
         <h2>Image rights</h2>
-        <!--
-        <p>Les sources des bannières des pages du site eNDP (endp.chartes.psl.eu) sont les
-          suivantes :</p>
-        <ul>
-          <li>
-            page d'accueil&nbsp;: «&nbsp;Olivier Truschet, Germain Hoyau&nbsp;; Plan de Paris vers 1550&nbsp;», Domaine public, <a href="https://commons.wikimedia.org/wiki/File:Plan_de_Paris_vers_1550_color.jpg">Wikimedia Commons</a>&nbsp;;
-          </li>
-          <li>
-            page personnes&nbsp;: «&nbsp;Unité de décor - f. 108r, Liturgie&nbsp;: service funèbre&nbsp;», <a href="https://mandragore.bnf.fr/ark:/12148/cgfbt209696b" target="_blank">BnF-Mandragore</a>, <a href="https://gallica.bnf.fr/edit/und/conditions-dutilisation-des-contenus-de-gallica" target="_blank">conditions de réutilisation</a>&nbsp;;
-          </li>
-          <li>
-            page registres&nbsp;: «&nbsp;Détail du <a href="https://nakala.fr/10.34847/nkl.8bdfe89g" target="_blank">registre capitulaire LL105</a>&nbsp;», <a href="https://creativecommons.org/licenses/by/4.0/legalcode.fr" target="_blank">CC-BY 4.0</a>&nbsp;;</li>
-          <li>
-            page ressources, mentions légales  et contacts&nbsp;: «&nbsp;Détail de la rosace ouest de la Cathédrale Notre-Dame de Paris&nbsp;», Cyril Preiss, <a href="https://www.culture.gouv.fr/Mentions-legales" target="_blank">conditions de réutilisation</a>.
-          </li>
-        </ul>
-
-        <p>L'icône <a href="https://icon-icons.com/pack/Business-Solid---The-Capitalism-icon-set/2534" target="_blank">«&nbsp;Processing&nbsp;»</a> présente dans le schéma de la page ressources du site est partagé sous licence <a href="https://creativecommons.org/licenses/by/4.0/legalcode.fr" target="_blank">CC-BY 4.0</a>.</p>
-
-        <p>Les crédits photographiques et autres mentions relatives aux droits d'auteur, tels que spécifiés sur ce site, doivent être respectés.</p>
-        -->
         <hr>
         <h1>Liability clause</h1>
         <p>

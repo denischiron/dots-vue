@@ -130,27 +130,8 @@ export default function useSimpleSearch() {
     const s = searchState.value
     if (!s) return
 
-    // let rangesArg = ''
-    // for (const k in s.ranges) {
-    //   rangesArg += `&range[${k}]=${s.ranges[k]}`
-    // }
     let rangesArg = ''
 
-    // Object.entries(s.ranges || {}).forEach(([field, range]) => {
-    //   const params = []
-    //
-    //   if (range.gte != null) {
-    //     params.push(`gte:${range.gte}`)
-    //   }
-    //
-    //   if (range.lte != null) {
-    //     params.push(`lte:${range.lte}`)
-    //   }
-    //
-    //   if (params.length) {
-    //     rangesArg += `&range[${field}]=${params.join(',')}`
-    //   }
-    // })
     Object.entries(s.ranges || {}).forEach(([field, range]) => {
 
 
