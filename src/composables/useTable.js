@@ -151,19 +151,18 @@ export function useTable(dataSource, columns, options = {}) {
 
   // Date columns are compared on their year bounds, never as strings: the
   // index already carries them, and they are parsed from the value otherwise.
-  // Same convention as the arrays above, asc on the earliest year, desc on
-  // the latest.
+  // Both directions use the start bound, as the search API does
+  // (`get_es_sort_field` in dots-cli-es), so desc is the exact reverse of asc
+  // and a collection page orders its dates like its search page.
   const getDateSortValue = (obj, path) => {
     const [namespace, field] = path.split('.')
-    const bound = sort.value.direction === 'desc' ? 'end' : 'start'
 
     if (namespace && field) {
-      const indexed = walkPath(obj, `temporal.${namespace}.${field}_${bound}`)
+      const indexed = walkPath(obj, `temporal.${namespace}.${field}_start`)
       if (typeof indexed === 'number') return indexed
     }
 
-    const bounds = yearBounds(getSortValue(obj, path))
-    return bounds ? bounds[bound] : undefined
+    return yearBounds(getSortValue(obj, path))?.start
   }
 
   const sorted = computed(() => {
@@ -229,8 +228,10 @@ export function useTable(dataSource, columns, options = {}) {
       : filtered.value.length
   })
 
-  // Reset page when filters change
-  watch(filters, () => {
+  // Reset page when filters or sort change: page N of a new order has nothing
+  // to do with page N of the previous one. Remote tables are reset by the
+  // search store instead.
+  watch([filters, sort], () => {
     if (!remote.value) {
       currentPage.value = 1
     }

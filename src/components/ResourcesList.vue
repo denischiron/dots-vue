@@ -300,7 +300,6 @@ import { useTable } from '@/composables/useTable.js'
 
 import SortIcon from '@/assets/images/SortIcon.vue'
 import Pagination from '@/components/Pagination.vue'
-import useSimpleSearch from '@/composables/use-simple-search'
 
 
 export default {
@@ -325,7 +324,8 @@ name: 'ResourcesList',
     collectionIndexed: { type: Boolean, default: null }
   },
   emits: [
-    'sort-change'
+    'sort-change',
+    'page-change'
   ],
 
   setup(props, { emit }) {
@@ -437,13 +437,12 @@ name: 'ResourcesList',
       return value
     }
 
-    const search = useSimpleSearch()
-
-    watch(pageNumber, async (page) => {
-      if (isElasticSearch.value) {
-        store.commit('search/setSearchPage', page < 1 ? 1 : page)
-
-        await search.execute()
+    // Remote pages are fetched by the parent, which owns the search. A page
+    // equal to `currentPage` was pushed down by the parent (a sort or a new
+    // search resetting to page 1) and must not trigger a second request.
+    watch(pageNumber, (page) => {
+      if (isElasticSearch.value && page !== props.currentPage) {
+        emit('page-change', Math.max(1, page))
       }
     })
 

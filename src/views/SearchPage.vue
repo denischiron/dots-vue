@@ -144,6 +144,7 @@
             :is-with-highlights="!!(isFulltextSearch && inputTerm.trim() && inputTerm.trim().length > 0)"
             :collection-indexed="search.collectionIndexed.value"
             @sort-change="updateSort"
+            @page-change="changePage"
           /><!--v-if="tableData.length > 0"-->
         </div>
       </div>
@@ -633,6 +634,14 @@ export default {
       inputSort.value = direction === 'desc' ? `-${key}` : key
     }
 
+    // PAGINATION
+    // Only the pages the user asks for: a page reset (sort, new search) goes
+    // through executeSearches(), which already fetches page 1.
+    const changePage = (pageNum) => {
+      search.setPageNum(pageNum)
+      search.execute()
+    }
+
     async function executeSearches() {
       // Do not send invalid query via @keyup.enter calling this directly (even if submit button is disabled)
       if (isInvalidQuery.value) return
@@ -797,9 +806,9 @@ export default {
        */
     })
 
+    // setSorts resets the pagination, and executeSearches() fetches page 1
     watch(inputSort, () => {
       search.setSorts(inputSort.value)
-      search.setPageNum(1)
       executeSearches()
     })
 
@@ -871,6 +880,7 @@ export default {
       invalidQueryMessage,
       deleteTerm,
       updateSort,
+      changePage,
       openedFacets,
       onTemporalChange,
       visibleTemporal,
