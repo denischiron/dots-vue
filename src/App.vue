@@ -20,7 +20,7 @@
     class="layout-grid-container"
   >
     <app-navbar
-      class="layout-navbar"
+      class="dots-ui layout-navbar"
       :key="currCollection"
       :class="routeNameCssClass"
       :is-doc-project-id-included="isDocProjectIdInc"
@@ -50,7 +50,7 @@
         :current-collection="currCollection"
       />
     </suspense>
-    <div class="scroll-top-wrapper app-width-margin">
+    <div class="dots-ui scroll-top-wrapper app-width-margin">
       <div
         v-show="scrollTopIsVisible"
         class="scroll-top"
@@ -72,7 +72,7 @@
     </div>
     <app-footer
       :key="currCollection"
-      class="layout-footer"
+      class="dots-ui layout-footer"
       :root-collection-identifier="rootCollectionIdentifier"
       :collection-identifier="collectionId"
       :footer-settings="collConfig.footerSettings"

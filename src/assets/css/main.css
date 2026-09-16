@@ -16,6 +16,7 @@ html {
     box-sizing: border-box;
     font-size: var(--font-default-size);
 }
+
 html,
 body {
     background-color: #ffffff;
@@ -24,56 +25,63 @@ body {
     padding: 0;
 }
 
-article, aside, figure, footer, header, hgroup, section {
-    display: block;
-}
+.dots-ui {
 
-blockquote, body, dd, dl, dt, fieldset, figure, h1, h2, h3, h4, h5, h6, hr, html, iframe, legend, li, ol, p, pre, textarea, ul {
-    margin: 0;
-    padding: 0;
-}
+    *, ::after, ::before {
+        box-sizing: inherit;
+    }
 
-h1, h2, h3, h4, h5, h6 {
-    font-size: 100%;
-    font-weight: 400;
-}
+    button, div, nav {
+        box-sizing: border-box;
+    }
 
-button, input, select, textarea {
-    margin: 0;
-}
+    article, aside, figure, footer, header, hgroup, section {
+        display: block;
+    }
 
-ul {
-    list-style: none;
-}
+    blockquote, body, dd, dl, dt, fieldset, figure, h1, h2, h3, h4, h5, h6, hr, html, iframe, legend, li, ol, p, pre, textarea, ul {
+        margin: 0;
+        padding: 0;
+    }
 
-article ul {
-    list-style-position: inside;
-    margin: 10px 0 10px 10px;
-}
+    h1, h2, h3, h4, h5, h6 {
+        font-size: 100%;
+        font-weight: 400;
+    }
 
-a {
-    color: #485fc7;
-    cursor: pointer;
-    text-decoration: none;
-}
+    button, input, select, textarea {
+        margin: 0;
+    }
 
-span {
-    font-style: inherit;
-    font-weight: inherit;
-}
+    ul {
+        list-style: none;
+    }
 
-*, ::after, ::before {
-    box-sizing: inherit;
-}
+    article ul {
+        list-style-position: inside;
+        margin: 10px 0 10px 10px;
+    }
 
-img {
-    height: auto;
-    max-width: 100%;
-}
+    a {
+        color: #485fc7;
+        cursor: pointer;
+        text-decoration: none;
+    }
 
-img, video {
-    height: auto;
-    max-width: 100%;
+    span {
+        font-style: inherit;
+        font-weight: inherit;
+    }
+
+    img {
+        height: auto;
+        max-width: 100%;
+    }
+
+    img, video {
+        height: auto;
+        max-width: 100%;
+    }
 }
 
 .container {
@@ -1052,6 +1060,7 @@ button.dots-button {
         width: 100%;
         height: 100%;
         border-radius: inherit;
+        box-sizing: border-box;
     }
 }
 

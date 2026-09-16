@@ -13,7 +13,7 @@
     <div
       v-if="currentLevelIndicator === 'renderToc'"
       id="article"
-      class="row bottom-toc"
+      class="dots-ui row bottom-toc"
     >
       <TOC
         :is-doc-project-id-included="isDocProjectIdInc"
@@ -26,7 +26,7 @@
     <div
       v-else-if="!currentLevelIndicator && currentLevel < editorialLevel"
       id="article"
-      class="row bottom-toc"
+      class="dots-ui row bottom-toc"
     >
       <TOC
         :is-doc-project-id-included="isDocProjectIdInc"
