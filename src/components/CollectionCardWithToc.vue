@@ -532,6 +532,7 @@ export default {
   width: 100%;
   padding-top: 25px;
   padding-bottom: 25px;
+  box-sizing: border-box;
 }
 
 button.toc-toggle {
@@ -572,6 +573,7 @@ button.toc-toggle {
 .mixed-mode.resources-grid {
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 /* Card */

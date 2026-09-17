@@ -1011,6 +1011,7 @@ export default {
   width: 100%;
   padding-top: 25px;
   padding-bottom: 25px;
+  box-sizing: border-box;
 }
 
 .collection-toc-area {

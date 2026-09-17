@@ -896,6 +896,7 @@ export default {
   margin-top: 40px;
   padding-top: 0;
   padding-bottom: 25px;
+  box-sizing: border-box;
 
   &.with-opened-facets {
     margin-top: 20px;
