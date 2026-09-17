@@ -1193,6 +1193,14 @@ input[type=number] {
     border-bottom: 2px solid var(--fill-color);
   }
 
+  .list-mode-wrapper {
+    width: auto;
+    padding-left: var(--mobile-margin);
+    padding-right: var(--mobile-margin);
+    margin-left: calc(-1 * var(--mobile-margin));
+    margin-right: calc(-1 * var(--mobile-margin));
+  }
+
   .list-mode .li.container.search-header {
     grid-template-columns: none;
     grid-auto-flow: column;
@@ -1228,6 +1236,7 @@ input[type=number] {
       min-height: var(--button-size);
     }
   }
+
 }
 
 @media screen and (max-width: 640px) {
@@ -1272,6 +1281,7 @@ input[type=number] {
       text-align: center;
     }
   }
+
 }
 
 

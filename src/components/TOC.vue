@@ -532,6 +532,7 @@ div.bottom-toc {
 
     & .li.container {
       display: flex;
+      align-items: center;
       margin: 0;
 
       & > a {
@@ -547,7 +548,7 @@ div.bottom-toc {
       padding-left: 0;
 
       & .li.container > a {
-        margin-top: 4px;
+        margin-top: 0;
       }
       &::before {
         content: none !important;

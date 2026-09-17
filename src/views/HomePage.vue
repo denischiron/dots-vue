@@ -1,5 +1,5 @@
 <template>
-  <div class="collection-wrapper">
+  <div class="dots-ui collection-wrapper">
     <CollectionHeader
       :collection-config="collConfig"
       :application-config="appConfig"

@@ -20,7 +20,7 @@
       class="document-card collection-card-with-toc-component"
     >
       <template v-if="item['@type'] === 'Collection' || item.citeType === 'Collection'">
-        <div class="collection-wrapper">
+        <div class="dots-ui collection-wrapper">
           <div
             v-if="true"
             class="card-header"
