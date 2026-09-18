@@ -2203,8 +2203,7 @@ export default {
 .document-views {
   width: 100%;
   min-height: 70vh;
-  /* */
-  margin: 0;
+  /*   margin: 0; */
   box-sizing: border-box;
 }
 .toc-area-aside {
@@ -2297,11 +2296,6 @@ export default {
 .text-and-images-mode .text-view,
 .text-and-images-mode .mirador-view {
   flex: 50% 0 0;
-}
-
-#center {
-  width: 100%;
-  margin: 0 !important;
 }
 
 #article {
