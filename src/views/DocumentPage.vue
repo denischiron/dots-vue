@@ -3,7 +3,7 @@
     class="is-flex is-flex-direction-column"
     :class="viewModeCssClass"
   >
-    <div class="navigation-row-top-container" id="navigation-row-top-container">
+    <div class="dots-ui navigation-row-top-container" id="navigation-row-top-container">
       <div class="navigation-row-top app-width-margin">
         <div class="ariane-collection-top">
           <div
@@ -188,7 +188,7 @@
       </div>
     </div>
     <nav
-      class="navigation-row app-width-padding"
+      class="dots-ui navigation-row app-width-padding"
       aria-label="Navigation du document"
     >
       <div class="navigation-document">
@@ -300,7 +300,7 @@
       </div>
     </nav>
     <div
-      class="controls app-width-margin"
+      class="dots-ui controls app-width-margin"
       :class="isControlsOpened ? 'is-opened' : ''"
       role="toolbar"
       aria-label="Options d’affichage du document"
@@ -392,7 +392,7 @@
       class="document-area is-flex app-width-margin"
       :class="tocMenuCssClass"
     >
-      <div class="toc-area-aside toc-content">
+      <div class="dots-ui toc-area-aside toc-content">
         <aside id="aside">
           <nav>
             <nav>
@@ -2036,8 +2036,10 @@ export default {
   }
 }
 .toc-area-content {
+  /*
   background-color: #e4e4e4;
   border-radius: 0 0 6px 6px;
+   */
   display: none;
 }
 .toc-area.is-opened .toc-area-header {
@@ -2200,6 +2202,8 @@ export default {
 .document-views {
   width: 100%;
   min-height: 70vh;
+  /*   margin: 0; */
+  box-sizing: border-box;
 }
 .toc-area-aside {
   display: none;
@@ -2291,11 +2295,6 @@ export default {
 .text-and-images-mode .text-view,
 .text-and-images-mode .mirador-view {
   flex: 50% 0 0;
-}
-
-#center {
-  width: 100%;
-  margin: 0 !important;
 }
 
 #article {
@@ -2783,6 +2782,7 @@ div.remove-bottom-padding #article {
   vertical-align: center;
   /*margin-bottom: 10px;*/
   pointer-events: auto;
+  box-sizing: border-box;
 }
 
 .controls {
@@ -2790,6 +2790,7 @@ div.remove-bottom-padding #article {
   top: 85px;
   z-index: 15; /* above document-area layer */
   pointer-events: none;
+  box-sizing: border-box;
 }
 
 .controls button {
@@ -2801,6 +2802,7 @@ div.remove-bottom-padding #article {
   z-index: 10;
   margin-top: -60px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .document-area.toc-aside-is-opened {

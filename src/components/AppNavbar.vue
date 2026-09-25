@@ -379,7 +379,9 @@ a:hover {
   text-decoration: none;
 }
 .level {
+  width: 100%;
   margin-bottom: 0 !important;
+  box-sizing: border-box;
 }
 nav  {
   display: flex;

@@ -1,5 +1,5 @@
 <template>
-  <article class="about">
+  <article class="dots-ui about">
     <div class="tiles">
       <div class="tile page-header app-width-padding">
         <div class="tile is-child">
@@ -156,13 +156,13 @@ article.about {
   margin-top: 0;
 }
 
-.tile.is-child {
+.about .tile.is-child {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
-.title-tile {
+.about .title-tile {
   display: flex;
   flex-direction: row;
   justify-content: center;
