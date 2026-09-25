@@ -16,6 +16,7 @@ html {
     box-sizing: border-box;
     font-size: var(--font-default-size);
 }
+
 html,
 body {
     background-color: #ffffff;
@@ -24,56 +25,63 @@ body {
     padding: 0;
 }
 
-article, aside, figure, footer, header, hgroup, section {
-    display: block;
-}
-
-blockquote, body, dd, dl, dt, fieldset, figure, h1, h2, h3, h4, h5, h6, hr, html, iframe, legend, li, ol, p, pre, textarea, ul {
-    margin: 0;
-    padding: 0;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    font-size: 100%;
-    font-weight: 400;
-}
-
-button, input, select, textarea {
-    margin: 0;
-}
-
-ul {
-    list-style: none;
-}
-
-article ul {
-    list-style-position: inside;
-    margin: 10px 0 10px 10px;
-}
-
-a {
-    color: #485fc7;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-span {
-    font-style: inherit;
-    font-weight: inherit;
-}
-
 *, ::after, ::before {
     box-sizing: inherit;
 }
 
-img {
-    height: auto;
-    max-width: 100%;
-}
+:where(.dots-ui) {
 
-img, video {
-    height: auto;
-    max-width: 100%;
+    img {
+        height: auto;
+        max-width: 100%;
+    }
+
+    img, video {
+        height: auto;
+        max-width: 100%;
+    }
+
+    button, div, nav {
+        box-sizing: border-box;
+    }
+
+    article, aside, figure, footer, header, hgroup, section {
+        display: block;
+    }
+
+    blockquote, dd, dl, dt, fieldset, figure, h1, h2, h3, h4, h5, h6, hr, iframe, legend, li, ol, p, pre, textarea, ul {
+        margin: 0;
+        padding: 0;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-size: 100%;
+        font-weight: 400;
+    }
+
+    button, input, select, textarea {
+        margin: 0;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    article ul {
+        list-style-position: inside;
+        margin: 10px 0 10px 10px;
+    }
+
+    a {
+        color: #485fc7;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    span {
+        font-style: inherit;
+        font-weight: inherit;
+    }
 }
 
 .container {
@@ -1052,6 +1060,7 @@ button.dots-button {
         width: 100%;
         height: 100%;
         border-radius: inherit;
+        box-sizing: border-box;
     }
 }
 

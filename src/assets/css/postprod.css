@@ -100,17 +100,13 @@
     margin-bottom: 0.5pc;
 }
 
-hr{
-    text-align: center;
-    margin: 2em auto 2.5em auto;
-}
-
 article > header {
     margin: 0em 4em 0em 0em;
     font-family: Georgia, "Bitstream Vera Serif", Times, serif;
 }
 
-article > header > h1, h2 {
+article > header > h1,
+article > header > h2 {
     font-family: Georgia, "Bitstream Vera Serif", Times, serif;
 }
 

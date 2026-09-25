@@ -455,11 +455,15 @@ div.toc-area-content.toc-content {
   }
 }
 div.toc-area-aside.toc-content {
-  .tree {
+
+  ul.tree {
+    width: 100%;
+    padding: 0;
+    margin: 1em 0 1em 0;
+
     font-size: 15px;
     font-weight: 500;
     line-height: 22px;
-    width: 100%;
   }
   .tree li {
     padding: 1px 0 1px 18px ;
@@ -479,7 +483,7 @@ div.toc-area-aside.toc-content {
     }
 
     &::before {
-      content: '';
+      /* content: ''; */
     }
 
     &:not(.more)::before {
@@ -528,6 +532,7 @@ div.bottom-toc {
 
     & .li.container {
       display: flex;
+      align-items: center;
       margin: 0;
 
       & > a {
@@ -543,7 +548,7 @@ div.bottom-toc {
       padding-left: 0;
 
       & .li.container > a {
-        margin-top: 4px;
+        margin-top: 0;
       }
       &::before {
         content: none !important;

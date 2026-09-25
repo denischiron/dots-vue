@@ -1,5 +1,5 @@
 <template>
-  <div class="collection-wrapper">
+  <div class="dots-ui collection-wrapper">
     <CollectionHeader
       :collection-config="collConfig"
       :application-config="appConfig"
@@ -906,6 +906,7 @@ export default {
   margin-top: 40px;
   padding-top: 0;
   padding-bottom: 25px;
+  box-sizing: border-box;
 
   &.with-opened-facets {
     margin-top: 20px;
