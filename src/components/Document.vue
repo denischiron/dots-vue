@@ -40,8 +40,8 @@
     <!-- For example : to be able to have a TOC on Collection ENCPOS, edited at the full position level (0) -->
     <div
       v-else-if="!currentLevelIndicator && currentLevel === editorialLevel && editorialLevel === 0 && documentType === 'Collection'"
-      id="dots-ui article"
-      class="row bottom-toc"
+      id="article"
+      class="dots-ui row bottom-toc"
     >
       <TOC
         :is-doc-project-id-included="isDocProjectIdInc"

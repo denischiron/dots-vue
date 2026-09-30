@@ -2006,6 +2006,7 @@ export default {
 .metadata-area .columns {
   margin: 0;
 }
+
 .toc-area {
   width: 100%;
   padding: 0;
@@ -2037,6 +2038,9 @@ export default {
 .toc-area.is-opened .toc-area-header {
   background-color: #f1f1f1;
   border-radius: 6px 6px 0 0;
+}
+.toc-area-header a {
+  color: inherit;
 }
 .toc-area.is-opened .toc-area-content {
   display: block;
@@ -2091,7 +2095,6 @@ export default {
   border: none;
   box-shadow: none;
 }
-
 .toc-area-aside a,
 .toc-area-content a {
   font-size: var(--font-toc-metadata-size);
@@ -2099,6 +2102,10 @@ export default {
 }
 
 .controls {
+  position: sticky;
+  top: 85px;
+  z-index: 15; /* above document-area layer */
+
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -2106,15 +2113,9 @@ export default {
   width: 100%;
   padding-top: 10px;
   padding-bottom: 10px;
-
-  z-index: 100;
   pointer-events: none;
+  box-sizing: border-box;
 }
-.controls button {
-  display: flex;
-  pointer-events: auto;
-}
-
 .controls-list {
   position: absolute;
   top: 64px;
@@ -2133,18 +2134,16 @@ export default {
     display: none;
   }
 }
-
 .controls button {
-  /* remove default button behavior */
   appearance: none;
   -webkit-appearance: none;
 
+  display: flex;
+  pointer-events: auto;
   background: white;
   border: none;
-
   padding: 0;
   margin: 0;
-
   cursor: pointer;
 }
 .controls-list button {
@@ -2152,7 +2151,6 @@ export default {
   align-items: center;
   justify-content: center;
 }
-
 .controls-toggle .icon-wrapper {
   color: var(--fill-color);
 }
@@ -2163,7 +2161,6 @@ export default {
   /* même couleur que stroke pour que le contour disparaisse visuellement */
   border: 1px solid var(--fill-color);
 }
-
 .controls .notes-btn {
   color: #C3C3C3;
 }
@@ -2171,7 +2168,6 @@ export default {
   outline: 2px solid #B9192F;
   outline-offset: 2px;
 }
-
 /* former pdf & xml button to adapt : where ?
 .controls a.pdf-btn {
   background: url(../assets/images/b_PDF.svg) center / cover no-repeat;
@@ -2297,105 +2293,11 @@ export default {
   display: none;
 }
 
-/*
-#article {
-
-
-  .argument {
-    font-family: var(--font-primary), sans-serif;
-    font-weight: 400;
-    font-size: var(--font-default-size);
-    font-variant: none;
-    line-height: 1.4;
-    color: var(--document-text-color);
-  }
-
-  .noteref sup:empty::before {
-    content: "#";
-    font-size: 12px;
-    vertical-align: top;
-  }
-  .footnotes {
-    margin: 90px 0 0;
-    position: relative;
-  }
-
-  .footnotes > h3 {
-    border-bottom: #E4E4E4 4px solid !important;
-  }
-
-  .footnotes ol {
-    list-style-position: inside;
-
-    & > li {
-      position: relative;
-      margin-left: 30px;
-
-      & > a.noteback {
-        top: 0;
-      }
-    }
-  }
-
-  .footnotes > *:first-child {
-    display: block;
-    margin-top: 45px !important;
-  }
-
-  .footnotes .note-page {
-    margin: 10px 0 22px;
-  }
-
-  .footnotes .note-page a {
-    font-weight: 700;
-    font-size: 18px;
-    border: none;
-    text-decoration: none;
-  }
-
-  .footnotes aside.note a.noteback:hover,
-  .footnotes .note-page a:hover {
-    text-decoration: underline;
-  }
-
-  .footnotes aside.note {
-    position: relative;
-    padding: 0 0 0 40px;
-    margin: 0 0 40px;
-    border: none;
-  }
-
-  .footnotes aside.note:target::before {
-    display: none;
-  }
-
-  .footnotes aside.note > i {
-    font-style: inherit;
-  }
-
-  .footnotes aside.note a.noteback {
-    position: absolute;
-    left: 0;
-    top: -2px;
-    display: inline;
-    width: auto;
-    margin: 0;
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--fill-color);
-    text-decoration: none;
-    text-align: left;
-  }
-}
-*/
-
-.toc-area-header a {
-  color: inherit;
-}
-
 * [class*="mirador-window-top-bar"] {
   border-top: none !important;
 }
+
+
 .ariane-collection {
   display: flex;
   flex-direction: column;
@@ -2486,7 +2388,6 @@ export default {
 
   position: relative;
 }
-
 .crumbs {
   display: flex;
   width: 100%;
@@ -2508,11 +2409,9 @@ export default {
   width: 100% !important;
   padding: 20px !important;
 }
-
 .crumbs li a:hover {
   text-decoration: var(--text-decoration-hover);
 }
-
 .crumbs {
   li {
     display: flex;
@@ -2606,18 +2505,6 @@ export default {
   /*margin-bottom: 10px;*/
   pointer-events: auto;
   box-sizing: border-box;
-}
-
-.controls {
-  position: sticky;
-  top: 85px;
-  z-index: 15; /* above document-area layer */
-  pointer-events: none;
-  box-sizing: border-box;
-}
-
-.controls button {
-  pointer-events: auto;
 }
 
 .document-area {
@@ -3022,17 +2909,6 @@ ul.breadcrumb-top > li:nth-child(10) { z-index: 1; }
   }
 }
 
-a.pb {
-  border: none;
-  background: transparent;
-
-  &:focus,
-  &:hover {
-    color: var(--fill-color);
-  }
-
-}
-
 
 @media screen and (max-width: 1320px) {
   .toc-area .toc-area-content nav > ol.tree {
@@ -3045,20 +2921,6 @@ a.pb {
     margin-right: 20px;
   }
 
-  /* Document page numbers */
-  a.pb {
-    float: none;
-    display: block;
-    width: 100%;
-    position: relative;
-    padding: 20px 0;
-    text-decoration: none !important;
-  }
-
-  .cb, .ed {
-    margin-right: 0;
-    padding: 20px 5px;
-  }
 }
 
 @media screen and (max-width: 1024px) {
@@ -3173,10 +3035,6 @@ a.pb {
     flex: 100% 0 0;
   }
 
-  .controls li:empty {
-    display: none;
-  }
-
   .text-mode .controls {
     .text-btn {
       pointer-events: none;
@@ -3197,6 +3055,10 @@ a.pb {
 
   .controls {
     top: 42px;
+  }
+
+  .controls li:empty {
+    display: none;
   }
 
   .controls-list.is-opened {
@@ -3312,10 +3174,6 @@ a.pb {
     padding: 0 !important;
   }
 
-  .l-n {
-    margin-left: -2.2rem;
-  }
-
   .tab-header,
   .tab-content {
     height: auto;
@@ -3393,18 +3251,9 @@ a.pb {
     }
   }
 
-
   .several-parent {
     flex-direction: column;
     align-items: center;
-  }
-
-  .l-n {
-    margin-left: -1.5rem;
-  }
-
-  small {
-    font-size: 9px;
   }
 
   .document-area {
