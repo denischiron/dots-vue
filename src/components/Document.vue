@@ -2,7 +2,7 @@
   <div class="document wrapper">
     <div
       class="row"
-      :class="currentLevelIndicator === 'renderToc' ? 'remove-bottom-padding' : ''"
+      :class="currentLevelIndicator === 'renderToc' ? 'dots-ui' : ''"
     >
       <Suspense @resolve="scrollTo()">
         <component :is="customDocument" />
@@ -665,27 +665,6 @@ export default {
 }
 </script>
 
-<!--<style src="@/assets/css/html.css" id="document-html-css">-->
-<!--.wrapper {-->
-<!--  display: flex;-->
-<!--  flex-direction: row;-->
-<!--}-->
-
-<!--header {-->
-<!--  clear: both;-->
-<!--  padding: 1ex;-->
-<!--  border: dashed #ccc 1px;-->
-<!--  -webkit-border-radius: 1ex;-->
-<!--  -moz-border-radius: 1ex;-->
-<!--  border-radius: 1ex;-->
-<!--}-->
-<!--.bottom-toc {-->
-<!--  padding: 0 10% 10% 120px;-->
-<!--  border-bottom: 1px dotted #ffffff;-->
-<!--  min-height: 100%;-->
-<!--}-->
-<!--</style>-->
-<style src="@/assets/css/postprod.css" />
 <style scoped>
 
 :deep(mark.search-highlight) {
