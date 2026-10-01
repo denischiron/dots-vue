@@ -82,14 +82,14 @@ body {
         font-style: inherit;
         font-weight: inherit;
     }
+}
+
+/* Styles for Document homepage */
+.dots-ui.document-description {
 
     p {
         margin-bottom: 0.5em;
     }
-}
-
-/* Styles for Document homepage */
-.dots-ui {
 
     .fileDesc > * {
         margin-bottom: 10px;
@@ -155,7 +155,6 @@ body {
         font-family: var(--font-primary), sans-serif;
         font-size: var(--font-small-size);
     }
-
 }
 
 .container {
