@@ -2187,12 +2187,17 @@ export default {
 .toc-area #aside header {
   display: none;
 }
+
+/* Override the "html" selector CSS rules of the document-renderer */
 .document-views {
   width: 100%;
   min-height: 70vh;
-  /*   margin: 0; */
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
   box-sizing: border-box;
 }
+
 .toc-area-aside {
   display: none;
 }
